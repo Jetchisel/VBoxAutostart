@@ -1,0 +1,169 @@
+#!/bin/bash
+# =========================================================================================== #
+#                                                                                             #
+#: Title           : systemd-vboxinit                                                         #
+#: Sypnosis        : systemd-vboxinit {stop|start}                                            #
+#: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                             #
+#: Last Edit       : Sun Oct  6 18:38:24 PHT 2013                                             #
+#: License         : GPL-2+0                                                                  #
+#: Version         : 1.0                                                                      #
+#: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
+#: Description     : Auto start sessions when booting and save sessions when host is stopped. #
+#: Options         : {stop|start}                                                             #
+#                                                                                             #
+# =========================================================================================== #
+
+
+# =========================================================================================== #
+#                                                                                             # 
+#                                >>> START OF SCRIPT <<<                                      #
+#                                                                                             #
+# =========================================================================================== #
+
+
+# ******************************************************************************************* #
+#                                                                                             #
+#              Check if VirtualBox is installed if not exit with an error.                    #
+#                                                                                             #
+# ******************************************************************************************* #
+
+if ! type -P VirtualBox >/dev/null 2>&1; then
+  if ! type -P virtualbox >/dev/null 2>&1; then
+    echo "VirtualBox is either not installed or is not in your PATH." >&2
+    exit 1
+  fi
+fi
+
+
+# ******************************************************************************************* #
+#                                                                                             #
+#                                  VBoxManage Functions.                                      #
+#                                                                                             #
+# ******************************************************************************************* #
+
+ExtraData() {
+  VBoxManage getextradata "$uuid" 'pvbx/startupMode'
+}
+
+ListVms() {
+  VBoxManage list vms
+}
+
+RunningVms() { 
+  VBoxManage list runningvms
+}
+
+StartVms() {
+  VBoxManage startvm "$uuid" --type headless
+}
+
+SaveVms() {
+  VBoxManage controlvm "$uuid" savestate
+}
+
+ShowVmInfo() {
+  VBoxManage showvminfo "$uuid"
+}
+
+
+# ******************************************************************************************* #
+#                                                                                             #
+#                          Function to start the vms headless.                                # 
+#                                                                                             #
+# ******************************************************************************************* #
+
+start() {
+  local machines uuid vmname startup vm state line
+  
+  machines=(
+    $(
+       while IFS='{}' read -ra vm; do 
+         echo "${vm[1]}"
+       done < <(ListVms)
+     )
+  )
+  
+  for uuid in "${machines[@]}"; do
+    startup=$(
+       while read -r state; do 
+         echo "${state#* }"
+       done < <(ExtraData)
+    )
+    
+    if [[ ${startup} = auto ]]; then
+      vmname=$(
+        while read -ra line; do 
+          [[ ${line[0]} != Name* ]] && continue
+          (( ${#line[@]} != 2 )) && continue 
+          echo "${line[1]}"
+        done < <(ShowVmInfo)
+      )
+      
+      if ! grep -q "$vmname" < <(RunningVms); then
+        printf "\n%s\n" "Starting machine ${vmname} ..."
+        StartVms  
+      else
+        echo "'$vmname' is already running"
+      fi
+    fi
+  done
+}  
+ 
+
+# ******************************************************************************************* #
+#                                                                                             #
+#              Function to save vms state instead of shutting down completely.                #
+#                                                                                             #
+# ******************************************************************************************* #
+
+stop() {
+  local machines uuid vmname vm line
+  
+  machines=(
+    $(
+        while IFS='{}' read -ra vm; do 
+          echo "${vm[1]}"
+        done < <(RunningVms)
+     )
+  )
+  
+  for uuid in "${machines[@]}"; do
+    vmname=$(
+      while read -ra line; do 
+        [[ ${line[0]} != Name* ]] && continue
+        (( ${#line[@]} != 2 )) && continue 
+        echo "${line[1]}"
+      done < <(ShowVmInfo)
+    )
+             
+    printf "\n%s\n" "Saving machine ${vmname} state ..."
+    SaveVms
+  done
+}
+
+
+# ******************************************************************************************** #
+#                                                                                              #
+#                              Check for a command line options.                               #
+#                                                                                              #
+# ******************************************************************************************** #
+
+case $1 in
+  stop|start) "$1" ;;              
+esac
+
+
+# ******************************************************************************************** #
+#                                                                                              #
+#                                   Set the exit staus.                                        #
+#                                                                                              #
+# ******************************************************************************************** #
+
+exit 0
+
+
+# ============================================================================================ #
+#                                                                                              # 
+#                                  >>> END OF SCRIPT <<<                                       #
+#                                                                                              #
+# ============================================================================================ #
