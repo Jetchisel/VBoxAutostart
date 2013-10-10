@@ -1,0 +1,17 @@
+[Unit]
+Description=VBox Virtual Machine Service
+Requires=systemd-modules-load.service
+After=systemd-modules-load.service
+Documentation=http://jason.ferrer.com.ph/2012/03/virtualbox-on-opensuse.html
+
+[Service]
+Type=oneshot
+User=jetchisel
+Group=vboxusers
+StandardOutput=journal
+ExecStart=/home/jetchise/bin/systemd-vboxinit start
+ExecStop=/home/jetchisel/bin/systemd-vboxinit stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
