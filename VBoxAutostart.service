@@ -2,7 +2,7 @@
 Description=VBox Virtual Machine Service
 Requires=systemd-modules-load.service
 After=systemd-modules-load.service
-Documentation=http://jason.ferrer.com.ph/2012/03/virtualbox-on-opensuse.html
+Documentation=http://jason.ferrer.com.ph/2013/10/virtualbox-autosave-autostart-of-vms.html
 
 [Service]
 Type=oneshot
