@@ -1,6 +1,7 @@
 [Unit]
 Description=VBox Virtual Machine Service
 Requires=systemd-modules-load.service
+Before=shutdown.target reboot.target halt.target
 After=systemd-modules-load.service
 Documentation=http://jason.ferrer.com.ph/2013/10/virtualbox-autosave-autostart-of-vms.html
 
@@ -8,6 +9,7 @@ Documentation=http://jason.ferrer.com.ph/2013/10/virtualbox-autosave-autostart-o
 Type=oneshot
 User=jetchisel
 Group=vboxusers
+KillMode=none
 StandardOutput=journal
 ExecStart=/home/jetchise/bin/systemd-vboxinit start
 ExecStop=/home/jetchisel/bin/systemd-vboxinit stop
