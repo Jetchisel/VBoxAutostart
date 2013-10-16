@@ -6,7 +6,7 @@
 #: Sypnosis        : systemd-vboxinit {stop|start}                                            #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                             #
 #: Last Edit       : Sun Oct  6 18:38:24 PHT 2013                                             #
-#: License         : GPL-2+0                                                                  #
+#: License         : GPLv3                                                                    #
 #: Version         : 1.0                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped. #
