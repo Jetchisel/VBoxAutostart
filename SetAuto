@@ -85,7 +85,7 @@ ManualAll(){
 
 # ******************************************************************************************* #
 #                                                                                             #
-#              Wait for 3 seconds so user can see the output and clear the screen.            #
+#              Wait for 2 seconds so user can see the output and clear the screen.            #
 #                                                                                             #
 # ******************************************************************************************* #
 
