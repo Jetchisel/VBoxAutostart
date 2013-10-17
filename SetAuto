@@ -156,7 +156,7 @@ SubMenu() {
 =========================================== 
 
 $(numbered)
-A) All
+A) All vms.
 R) Return to main menu.
 Q) Exit
 
