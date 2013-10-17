@@ -158,7 +158,7 @@ SubMenu() {
 $(numbered)
 A) All
 R) Return to main menu.
-Q) exit
+Q) Exit
 
 =>
 
