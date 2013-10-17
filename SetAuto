@@ -189,7 +189,7 @@ Auto() {
     read -r -e -p "$sub_menu" -n1
         if  [[ ${REPLY} = $new ]]; then   
           VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
-          printf "\n%s " "${listvms[$REPLY]} has been set to auto."
+          printf "\n%s " "${listvms[${REPLY}]} has been set to auto."
           Wait
         elif [[ ${REPLY} = [Aa] ]]; then
           AutoAll
