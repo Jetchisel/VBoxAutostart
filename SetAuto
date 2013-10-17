@@ -187,17 +187,17 @@ Auto() {
   clear
   while true; do
     read -r -e -p "$sub_menu" -n1
-        if  [[ $REPLY = $new ]]; then   
-          VBoxManage setextradata "${listvms[$REPLY]}"  pvbx/startupMode auto
+        if  [[ ${REPLY} = $new ]]; then   
+          VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
           printf "\n%s " "${listvms[$REPLY]} has been set to auto."
           Wait
-        elif [[ $REPLY = [Aa] ]]; then
+        elif [[ ${REPLY} = [Aa] ]]; then
           AutoAll
           printf "\n%s " "${listvms[*]} has been set to auto."
           Wait
-       elif [[ $REPLY = [Rr] ]]; then
+       elif [[ ${REPLY} = [Rr] ]]; then
          return 0
-       elif [[ $REPLY = [Qq] ]]; then
+       elif [[ ${REPLY} = [Qq] ]]; then
          clear
          exit 0
        else  
@@ -218,18 +218,18 @@ Manual(){
   clear
   while true; do
     read -r -e -p "$sub_menu" -n1
-        if  [[ $REPLY = $new ]]; then
-          VBoxManage setextradata "${listvms[$REPLY]}"  pvbx/startupMode manual
-          printf "\n%s " "${listvms[$REPLY]} has been set to manual."
+        if  [[ ${REPLY} = $new ]]; then
+          VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
+          printf "\n%s " "${listvms[${REPLY}]} has been set to manual."
           Wait
-        elif [[ $REPLY = [Aa] ]]; then
+        elif [[ ${REPLY} = [Aa] ]]; then
           ManualAll 
           printf "\n%s " "${listvms[*]} has been set to manual."
           Wait
-        elif [[ $REPLY = [Rr] ]]; then
+        elif [[ ${REPLY} = [Rr] ]]; then
           return 0    
           clear
-        elif [[ $REPLY = [Qq] ]]; then
+        elif [[ ${REPLY} = [Qq] ]]; then
           clear
           exit 0    
         else
@@ -249,7 +249,7 @@ Manual(){
 while true; do
   clear
   read -r -e -p "$main_menu" -n1
-    case  $REPLY in 
+    case  ${REPLY} in 
        1) Auto  ;;
        2) Manual
           clear ;;
