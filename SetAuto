@@ -5,7 +5,7 @@
 #: Title           : SetAuto                                                                  #
 #: Sypnosis        : SetAuto                                                                  #
 #: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
-#: Last Edit       : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
+#: Last Edit       : Fri Oct 18 07:38:59 PHT 2013 / Thu Oct 17 23:39:17 UTC 2013              #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.0                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
@@ -128,13 +128,13 @@ new=${new%%|}
 
 MainMenu(){
   cat <<-EOF
-=========================================
-|  What do you want to do with the vms? |
-=========================================
++=========================================+
+|  What do you want to do with the vms?   |
++=========================================+
 
 1) Set to Auto.
 2) Set to Manual.
-Q) To quit.
+Q) Exit.
 
 =>
 
@@ -151,14 +151,14 @@ EOF
 
 SubMenu() {
   cat <<-EOF
-===========================================
-|     Key in  the number of the vms.      |
-=========================================== 
++===========================================+
+|     Key in  the number of the vms.        |
++===========================================+ 
 
 $(numbered)
-A) All vms.
+A) All vms
 R) Return to main menu.
-Q) Exit
+Q) Exit.
 
 =>
 
@@ -169,7 +169,22 @@ EOF
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                   Save the Menu's to a variable so read can present it properly.            #
+#          Check if vms is more than 9, if it is then one click button is diabled.            #
+#                                                                                             #
+# ******************************************************************************************* #
+
+VmsTotal() {
+  if (( ${#listvms[@]} < 10  )); then
+    read -r -e -p "$sub_menu" -n1
+  elif (( ${#listvms[@]} > 9 )); then
+    read -r -e -p "$sub_menu" 
+  fi
+}
+
+
+# ******************************************************************************************* #
+#                                                                                             #
+#                Save the Menu's to a variable so read can present it properly.               #
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -179,31 +194,31 @@ printf -v sub_menu "%s" "$(SubMenu) "
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                 Function to set vms to auto.                                #
+#                               Function to set vms to auto.                                  #
 #                                                                                             #
 # ******************************************************************************************* #
 
 Auto() {
   clear
   while true; do
-    read -r -e -p "$sub_menu" -n1
-        if  [[ ${REPLY} = $new ]]; then   
-          VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
-          printf "\n%s " "${listvms[${REPLY}]} has been set to auto."
-          Wait
-        elif [[ ${REPLY} = [Aa] ]]; then
-          AutoAll
-          printf "\n%s " "${listvms[*]} has been set to auto."
-          Wait
-       elif [[ ${REPLY} = [Rr] ]]; then
-         return 0
-       elif [[ ${REPLY} = [Qq] ]]; then
-         clear
-         exit 0
-       else  
-         printf "\n%s" "Invalid option!"
-         Wait
-      fi
+    VmsTotal
+     if  [[ ${REPLY} = $new ]]; then   
+       VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
+       printf "\n%s " "${listvms[${REPLY}]} has been set to auto."
+       Wait
+     elif [[ ${REPLY} = [Aa] ]]; then
+       AutoAll
+       printf "\n%s " "${listvms[*]} has been set to auto."
+       Wait
+     elif [[ ${REPLY} = [Rr] ]]; then
+       return 0
+     elif [[ ${REPLY} = [Qq] ]]; then
+       clear
+       exit 0
+     else  
+       printf "\n%s" "Invalid option!" >&2
+       Wait
+     fi
   done
 }
 
@@ -216,25 +231,26 @@ Auto() {
 
 Manual(){
   clear
-  while true; do
-    read -r -e -p "$sub_menu" -n1
-        if  [[ ${REPLY} = $new ]]; then
-          VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
-          printf "\n%s " "${listvms[${REPLY}]} has been set to manual."
-          Wait
-        elif [[ ${REPLY} = [Aa] ]]; then
-          ManualAll 
-          printf "\n%s " "${listvms[*]} has been set to manual."
-          Wait
-        elif [[ ${REPLY} = [Rr] ]]; then
-          return 0    
-          clear
-        elif [[ ${REPLY} = [Qq] ]]; then
-          clear
-          exit 0    
-        else
-          printf "\n%s" "Invalid option!"
-          Wait
+  
+  while true; do   
+    VmsTotal
+      if  [[ ${REPLY} = $new ]]; then
+        VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
+        printf "\n%s " "${listvms[${REPLY}]} has been set to manual."
+        Wait
+      elif [[ ${REPLY} = [Aa] ]]; then
+        ManualAll 
+        printf "\n%s " "${listvms[*]} has been set to manual."
+        Wait
+      elif [[ ${REPLY} = [Rr] ]]; then
+        return 0    
+        clear
+      elif [[ ${REPLY} = [Qq] ]]; then
+        clear
+        exit 0    
+      else
+        printf "\n%s" "Invalid option!" >&2
+        Wait
        fi
   done
 }
@@ -242,25 +258,24 @@ Manual(){
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                Parsing  the main menu.                                      #
+#                                  Parsing the main menu.                                     #
 #                                                                                             #
 # ******************************************************************************************* #
 
 while true; do
   clear
   read -r -e -p "$main_menu" -n1
-    case  ${REPLY} in 
+    case ${REPLY} in 
        1) Auto  ;;
        2) Manual
           clear ;;
     [Qq]) clear
           exit 0;;
-       *) printf "\n%s" "Invalid option!"
+       *) printf "\n%s" "Invalid option!" >&2
           Wait
           clear ;;
     esac
 done
-
 
 
 # ******************************************************************************************** #
