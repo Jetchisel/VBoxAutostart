@@ -231,7 +231,6 @@ Auto() {
 
 Manual(){
   clear
-  
   while true; do   
     VmsTotal
       if  [[ ${REPLY} = $new ]]; then
