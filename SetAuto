@@ -86,9 +86,9 @@ ManualAll(){
 
 StatusAll(){
   for vm in "${listvms[@]}"; do
-     mapfile -t outcome < <(VBoxManage getextradata "${vm}" pvbx/startupMode) 
-     All=("${vm}" "${outcome[@]}")
-     printf "%s\n" "${All[*]}"
+    mapfile -t outcome < <(VBoxManage getextradata "${vm}" pvbx/startupMode) 
+    All=("${vm}" "${outcome[@]}")
+    printf "%s\n" "${All[*]}"
   done
 }
 
@@ -115,13 +115,13 @@ num=(
 paused() {
   while :; do
     printf "\n%s\n"
-    printf -v prompt "Press c to continue. "
+    printf -v prompt "Continue [Yy] "
       read -r -e -p "$prompt" -n1 button
         case "$button" in
-          [Cc]) clear 
-                return 0;; 
-              *) printf "%s\n" "Invalid answer!"
-                
+          [Yy]) clear 
+                return 0 
+                clear;;
+             *)  printf "%s\n" "Invalid answer!"
         esac
   done
 }
@@ -133,7 +133,7 @@ paused() {
 # ******************************************************************************************* #
 
 Wait(){
-  sleep 2 
+  sleep 1 
   clear
 }
 
@@ -158,10 +158,10 @@ MainMenu(){
 |           SELECT THE CHOICES BELOW               |
 +==================================================+
 
-1) SET VMS TO AUTO.
-2) SET VMS TO MANUAL.
-3) CHECK STATUS OF VMS.
-Q) EXIT.
+1) SET VMS TO AUTO
+2) SET VMS TO MANUAL
+3) CHECK STATUS OF VMS
+Q) EXIT
 
 =>
 
@@ -182,9 +182,9 @@ SubMenu() {
 +==================================================+ 
 
 $(numbered)
-A) SELECT All VMS. 
-R) RETURN TO MAIN MENU.
-Q) EXIT.
+A) SELECT All VMS 
+R) RETURN TO MAIN MENU
+Q) EXIT
 
 =>
 
