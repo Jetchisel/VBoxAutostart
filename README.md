@@ -64,7 +64,7 @@ Get the status.
 
      VBoxManage setextradata YOUR-VM-NAME pvbx/startupMode manual 
 
- Using SetAuto script is another option to set your vms to auto or manual. 
+ Using ExtraData script is another option to set your vms to auto or manual. 
 
  4. To access your vms.
 
