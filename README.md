@@ -30,7 +30,7 @@ Change the group to vboxusers
 
 Replace my username in that file and copy that file to its destination as root.
 
-     cp -v VBoXvmservice.service /usr/lib/systemd/ 
+     cp -v VBoXvmservice.service /usr/lib/systemd/system 
 
  Start that service.
 
