@@ -70,9 +70,14 @@ Get the status.
 
      rdesktop localhost:1234 
 
-
 where 1234 is the port number which you can set via the gui or via VBoxManage.  
 
 A gui app which you can use is krdc for Kde and   gnome-rdp for Gnome.
 
 NOTE: if you have the phpvirtualbox solution then you do not need this thus it can conflict with each other.
+
+----
+
+vboxinit comes from the phpvirtualbox project which works for sysV init.
+This is the modified/rewritten version for openSuSE using systemd.
+Kudos to Ian Moore the author of phpvirtualbox.
