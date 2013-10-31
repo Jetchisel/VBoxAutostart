@@ -87,7 +87,7 @@ vmname(){
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                          Function to start the vms headless.                                # 
+#                          Function to start the vms Headless.                                # 
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -108,6 +108,8 @@ start() {
       else
         echo "'$(vmname)' is already running"
       fi
+    elif [[ ${startup} != auto ]]; then
+      printf "\n%s\n"  "$(vmname) is not set to auto..."
     fi
   done
 }  
