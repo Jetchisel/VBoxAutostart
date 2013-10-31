@@ -1,19 +1,19 @@
 [Unit]
-Description=VBox Virtual Machine Service
-Requires=systemd-modules-load.service
-Before=shutdown.target reboot.target halt.target
+Description=VBox Virtual Machine Service 
+Requires=systemd-modules-load.service 
 After=systemd-modules-load.service
-Documentation=http://jason.ferrer.com.ph/2013/10/virtualbox-autosave-autostart-of-vms.html
+Before=shutdown.target reboot.target halt.target
+Documentation=man:systemd-vboxinit(1)
 
 [Service]
 Type=oneshot
-User=jetchisel
-Group=vboxusers
+User=%I
 KillMode=none
+Group=vboxusers
+RemainAfterExit=true
 StandardOutput=syslog+console
-ExecStart=/home/jetchise/bin/systemd-vboxinit start
-ExecStop=/home/jetchisel/bin/systemd-vboxinit stop
-RemainAfterExit=yes
+ExecStart=-/usr/bin/systemd-vboxinit start
+ExecStop=-/usr/bin/systemd-vboxinit stop
 
 [Install]
 WantedBy=multi-user.target
