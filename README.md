@@ -6,78 +6,60 @@ the vms you can set to auto via VBoxManage.
 
  This works with  systemd only.
 
-1. Download the script that will handle the vms.
 
-     wget https://raw.github.com/Jetchisel/systemd-vboxinit/master/systemd-vboxinit 
+       At  creation time of the vms the extradata with the key pvbx/startupMode has no value.(Which is ignored) One need's to add the "auto" flag
+       to the virtual machine in order for it  auto boot and auto save during startup and shutdown or reboot of the host.  The  virtual  machines
+       are  then  run  in the background.  (which is what a daemon is all about :-)). One can access the virtual machines by using ssh(1) or with
+       the gui tools such as  Krdc for KDE and the equivalent for other DE's. Example of commands are:
 
-Copy it to your ~/bin directory.
+       List the vms.
 
-      cp -v systemd-vboxinit ~/bin   
+         VBoxManage list vms
 
-Make it executable.
+       Set the "auto" flag to the vms.
 
-     chmod ug+x ~/bin/systemd-vboxinit 
+         VBoxManage setextradata vm-name pvbx/startupMode auto
 
+       Set the "manual" flag to the vms.
 
-Change the group to vboxusers
+         VBoxManage setextradata vm_name pvbx/startupMode manual
 
-     chgrp vboxusers ~/bin/systemd-vboxinit 
-
-
-2. Download the unit file that will execute your script during boot/restart/shutdown of the host. Replace my username with the user who will run the vms.
-
-     wget https://raw.github.com/Jetchisel/systemd-vboxinit/master/VBoXvmservice.service 
-
-Replace my username in that file and copy that file to its destination as root.
-
-     cp -v VBoXvmservice.service /usr/lib/systemd/system 
-
- Start that service.
-
-     systemctl start VBoXvmservice.service 
-
-Enable it .
-
-     systemctl enable VBoXvmservice.service 
-
-Check the status.
-
-     systemctl status VBoXvmservice.service 
+       Where "vm_name" is the name of the virtual machine.
 
 
+NOTE
+       It is not recommended to run the script with root's right such as running it with the all time favorite sudo utility.  Once one  have  set
+       the  "auto"  flag  to  the  virtual  machines one can test the script. Invoke it as a normal user that belongs to the vboxusers group. (It
+       should be in once PATH so absolute path is not necessary.)
 
- 3. Choose your vms that you want to autostart and autosave during boot/restart/shutdown of your host.
+        systemd-vboxinit start
 
-Get the names of the vms.
+        systemd-vboxinit stop
 
-      VBoxManage list vms  
+       One should see the virtual machines starting and saving state. If that succeeded one can enable the daemon and reboot.
 
-Set it to auto so the script will handle the autostart and autosave of the vm.
 
-     VBoxManage setextradata YOUR-VM-NAME pvbx/startupMode auto 
+USING THE DAEMON
+       Start the service.
 
-Get the status.
+         systemctl start VBoxAutostart@foo
 
-      VBoxManage getextradata YOUR-VM-NAME pvbx/startupMode  
+       Enable the service.
 
- Set it to manual if you dont want your vms to be handled by the script.
+         systemctl enable VBoxAutostart@foo
 
-     VBoxManage setextradata YOUR-VM-NAME pvbx/startupMode manual 
+       Check the status of the service
 
- Using ExtraData script is another option to set your vms to auto or manual. 
+         systemctl status VBoxAutostart@foo
 
- 4. To access your vms.
+         journalctl _SYSTEMD_UNIT=VBoxAutostart@foo.service
 
-     rdesktop localhost:1234 
+       Restart the service.
 
-where 1234 is the port number which you can set via the gui or via VBoxManage.  
+         systemctl restart VBoxAutostart@foo
 
-A gui app which you can use is krdc for Kde and   gnome-rdp for Gnome.
+       Where foo is the username of the user who will use systemd-vboxinit.
 
-NOTE: if you have the phpvirtualbox solution then you do not need this thus it can conflict with each other.
 
-----
 
-vboxinit comes from the phpvirtualbox project which works for sysV init.
-This is the modified/rewritten version for openSuSE using systemd.
-Kudos to Ian Moore the author of phpvirtualbox.
+
