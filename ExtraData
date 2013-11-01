@@ -34,13 +34,14 @@ shopt -s extglob
 #                                                                                             #
 # ******************************************************************************************* #
 
-listvms=(
-  $(
-    while IFS='"' read -ra list; do
-      echo "${list[1]}"
-    done < <(VBoxManage list vms)
-  )
-)
+Listvms(){
+  while IFS='"' read -ra list; do
+    echo "${list[1]}"
+  done < <(VBoxManage list vms)
+}
+
+mapfile -t listvms < <(Listvms)
+
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -98,13 +99,13 @@ StatusAll(){
 #                                                                                             #
 # ******************************************************************************************* #
 
-num=(
-  $(
-     while read -r line; do
-       echo "${line[@]%)*}"
-     done < <(numbered)
-   )
-)
+Num(){
+  while read -r line; do
+    echo "${line[@]%)*}"
+  done < <(numbered)
+}
+
+mapfile -t num < <(Num)
 
 # ******************************************************************************************* #
 #                                                                                             #
