@@ -1,0 +1,92 @@
++================================================================+
+|     ____                         _   _       _                 |
+|    / ___|  ___  _ __ ___   ___  | \ | | ___ | |_ ___  ___      |
+|    \___ \ / _ \| '_ ` _ \ / _ \ |  \| |/ _ \| __/ _ \/ __|     |
+|     ___) | (_) | | | | | |  __/ | |\  | (_) | ||  __/\__ \     |
+|    |____/ \___/|_| |_| |_|\___| |_| \_|\___/ \__\___||___/     |
+|                                                                |
++================================================================+  
+
+
+------------------------------------------------------------------
+
+The  VirtualBox  package  that is running in your system might or
+does have an init script which is located in  /etc/init.d/*  such
+as the vboxes, vboxautostart-service or you may have your own way
+of doing the "autostart" of your virtual machines.  You will need
+to  disable  them  if  you  suspect of any conflicts with VBoxAu-
+tostart.
+
+Since systemd is supposedly "faster" (yay!) than the legacy  sys-
+temV init, there might be (or not) a time that VBoxAutostart will
+start first before native service (init scripts)  of  VirtualBox,
+therefore  you might  have some errors like "Could not find vbox-
+drv" also if VBoxManage become's more versbose than  normal, among 
+other things. If you suspected this you can add the vboxdrv kernel
+module in /etc/sysconfig/kernel --> MODULES_LOADED_ON_BOOT.  Then 
+run as root: /sbin/mkinitrd
+
+The standard output of the unit VBoxAutostart  is  syslog+console
+therefore  you  can  see it while booting and stopping your host.
+If you have the silent flag in your /etc/default/grub you need to
+press  the  <ESC>  key while booting and stopping your host.  You
+can change the silent flag to  verbose  in  /etc/default/grub  by
+editing  it. An example of doing it is running the following com-
+mands are root.
+
+ cp -v /etc/default/grub /etc/default/grub.orig
+
+ ex -sc '%s/silent/verbose/ge|x' /etc/default/grub
+
+ grub2-mkconfig -o /boot/grub2/grub.cfg
+
+------------------------------------------------------------------
+
+If  you  want  to  run  your vms (without running it at the back-
+ground) after logging in and with X server running you  can  edit
+the  systemd-vboxinit script and replace headless with either gui
+or sdl. You can call that script using your  ~/.xinitrc  file  or
+some  DE  such  KDE  has  the  "autostart"  option  to  run  pro-
+grams/scripts during log-in. You cannot run  systemd-vboxinit  in
+the  background  if you have replaced headless with the other op-
+tions. The daemon starts before the  X server so  your  vms  will
+just crash and it makes no SENSE!
+
+An example of editing the script:
+
+Running it with the normal "gui" option.
+
+  ex -sc '%s/headless/gui/ge|x' systemd-vboxinit
+
+Running it with the "sdl" option.
+
+  ex -sc '%s/headless/sdl/ge|x' systemd-vboxinit
+
+
+Just be prepared to be met with your vms when you log-in :-)
+Dont forget to disable the VBoxAutostart daemon!
+--------------------------------------------------------------------
+
+For some convenience setting/getting extrada to your virtual  ma-
+chines  copy the ExtraData script to your "$HOME"/bin and make it
+executable. As a normal user run the following.
+
+  cp -v ExtraData "$HOME"/bin
+
+  chmod +x "$HOME"/bin/ExtraData
+
+Now call the script.
+
+  ExtraData
+
+---------------------------------------------------------------------
+
+VirtualBox  is  a trademark of Oracle and others by their respective 
+owners and trademark holders.
+
+---------------------------------------------------------------------
+
+
+Enjoy folks....
+
+
