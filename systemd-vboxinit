@@ -103,13 +103,13 @@ start() {
     
     if [[ ${startup} = auto ]]; then  
       if ! grep -q "$(vmname)" < <(RunningVms); then
-        printf "\n%s\n" "Starting machine $(vmname) ..."
+        printf "\n%s\n" "Starting machine '$(vmname)'..."
         StartVms  
       else
         echo "'$(vmname)' is already running"
-      fi
+      fi  
     elif [[ ${startup} != auto ]]; then
-      printf "\n%s\n"  "$(vmname) is not set to auto..."
+      printf "%s\n"  "'$(vmname)' is not set to auto..."
     fi
   done
 }  
@@ -124,7 +124,7 @@ stop() {
   Machines RunningVms
     
   for uuid in "${machines[@]}"; do
-    printf "\n%s\n" "Saving machine $(vmname) state ..."
+    printf "\n%s\n" "Saving machine '$(vmname)' state ..."
     SaveVms
   done
 }
@@ -137,6 +137,7 @@ stop() {
 
 case $1 in
   stop|start) "$1" ;;              
+           *) echo 'Usage {start|stop}' ;;
 esac
 
 # ******************************************************************************************** #
