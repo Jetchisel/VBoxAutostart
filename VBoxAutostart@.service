@@ -12,8 +12,8 @@ KillMode=none
 Group=vboxusers
 RemainAfterExit=true
 StandardOutput=syslog+console
-ExecStart=-/usr/bin/systemd-vboxinit start
-ExecStop=-/usr/bin/systemd-vboxinit stop
+ExecStart=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit start
+ExecStop=-/usr/lib/systemd-vboxini.d/systemd-vboxinit stop
 
 [Install]
 WantedBy=multi-user.target
