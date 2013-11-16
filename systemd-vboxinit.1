@@ -13,7 +13,7 @@ with systemd as it's startup daemon. ( which should work for other distro that i
 
 .SH MANAGE VMS
 
-At creation time of the vms the extradata with the key pvbx/startupMode has no value.(Which is ignored)
+At creation time of the vms the extradata with the key "pvbx/startupMode" has no value (Which is ignored).
 One need's to add the "auto" flag to the virtual machine in order for it  auto boot and auto save during 
 startup and shutdown or reboot of the host. The virtual machines are then run in the background.
 (which is what a daemon is all about :-)). One can access the virtual machines by using ssh(1) or with the 
@@ -35,15 +35,16 @@ Where "vm_name" is the name of the virtual machine.
 
 .SH NOTE
  
-It is not recommended to run the script with root's right such as running it with the all time favorite sudo utility.
-Once one have set the "auto" flag to the virtual machines one can test the script. Invoke it as a normal
-user that belongs to the vboxusers group. (It should be in once PATH so absolute path is not necessary.)
+It is not recommended to run systemd-vboxinit with root's right such as running it with the all time favorite sudo utility.
+Once one have set the "auto" flag to the virtual machines one can test it. One should invoke it as a normal user that belongs
+to the vboxusers group. 
 
- systemd-vboxinit start
+ /usr/lib/systemd-vboxinit.d/systemd-vboxinit start
 
- systemd-vboxinit stop
+ /usr/lib/systemd-vboxinit.d/systemd-vboxinit stop
 
-One should see the virtual machines starting and saving state. If that succeeded one can enable the daemon and reboot.
+One should see the virtual machines starting and saving state. If that succeeded one should enable the daemon while the virtual
+machines are running and reboot.
 
 .SH USING THE DAEMON 
 
@@ -65,15 +66,16 @@ Restart the service.
 
   systemctl restart VBoxAutostart@foo
   
-Where foo is the username of the user who will use systemd-vboxinit.
+Where foo is the username of the user who will use systemd-vboxinit. For multi-user one need's to start and enable the daemon with the
+specific username. One should consider the resources such as memory, cpu to be sufficient enough to run the vms.
 
-.SH DOCS
+.SH README 
 
-/usr/share/doc/packages/systemd-vboxinit
+file:///usr/share/doc/packages/systemd-vboxinit/README
 
 .SH SEE ALSO
 
-systemctl(1), systemd(1), systemd.unit(5), systemd.service(5), VBoxManage
+systemctl(1), systemd(1), VBoxManage
 
 .SH AUTHOR
 
