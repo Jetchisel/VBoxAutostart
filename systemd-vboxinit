@@ -65,11 +65,13 @@ ShowVmInfo() {
 
 Machines() { 
   mapfile -t machines < <(
-    while IFS='{}' read -ra vm; do 
-      echo "${vm[1]}"
+    while read -ra vm; do
+      _uuid=${vm[1]/"{"/}
+      echo "${_uuid/"}"/}"
     done < <("$1")
   )
 }
+
 
 # ******************************************************************************************* #
 #                                                                                             #
