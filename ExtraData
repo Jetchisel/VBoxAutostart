@@ -5,7 +5,7 @@
 #: Title           : ExtraData                                                                #
 #: Sypnosis        : ExtraData                                                                #
 #: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
-#: Last Edit       : Sat Oct 19 21:55:16 PHT 2013 / Sat Oct 19 13:55:59 UTC 2013              #
+#: Last Edit       : Fri 20 Dec 20:14:23 PHT 2013 / Fri 20 Dec 12:14:43 UTC 2013              #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.0                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
@@ -28,9 +28,11 @@ shopt -s extglob
 #                                                                                             #
 # ******************************************************************************************* #
 
-Listvms(){
-  while IFS='"' read -ra list; do
-    echo "${list[1]}"
+Listvms() {
+  while read -r line; do 
+    Vmname=${line#*\"}
+    Vmname=${Vmname%%\"*}
+    echo "$Vmname"
   done < <(VBoxManage list vms)
 }
 
@@ -42,7 +44,7 @@ mapfile -t listvms < <(Listvms)
 #                                                                                             #
 # ******************************************************************************************* #
 
-numbered(){ 
+numbered() { 
   for i in "${!listvms[@]}"; do
     printf "%s\n" "${listvms[i]/#/$i) }"
   done
@@ -66,7 +68,7 @@ AutoAll() {
 #                                                                                             #
 # ******************************************************************************************* #
 
-ManualAll(){
+ManualAll() {
   for vm in "${listvms[@]}"; do
     VBoxManage setextradata "${vm}" pvbx/startupMode manual
   done
@@ -78,11 +80,18 @@ ManualAll(){
 #                                                                                             #
 # ******************************************************************************************* #
 
-StatusAll(){
-  for vm in "${listvms[@]}"; do
-    mapfile -t outcome < <(VBoxManage getextradata "${vm}" pvbx/startupMode) 
-    All=("${vm}" "${outcome[@]}")
-    printf "%s\n" "${All[*]}"
+StatusAll() {
+
+  status() {
+    for vm in "${listvms[@]}"; do
+      VBoxManage getextradata "${vm}" pvbx/startupMode
+    done
+  }
+
+  mapfile -t stats < <(status)
+
+  for i in "${!listvms[@]}"; do
+    printf '%s\n' "[\"${listvms[i]}\"]=${stats[i]#*: }"
   done
 }
 
@@ -92,7 +101,7 @@ StatusAll(){
 #                                                                                             #
 # ******************************************************************************************* #
 
-Num(){
+Num() {
   while read -r line; do
     echo "${line[@]%)*}"
   done < <(numbered)
@@ -109,7 +118,7 @@ mapfile -t num < <(Num)
 paused() {
   while :; do
     printf "\n%s\n"
-    printf -v prompt "Continue [Yy] "
+    printf -v prompt "Press [Yy] to continue "
       read -r -e -p "$prompt" -n1 button
         case "$button" in
           [Yy]) clear 
@@ -146,7 +155,7 @@ new=${new%%|}
 #                                                                                             #
 # ******************************************************************************************* #
 
-MainMenu(){
+MainMenu() {
   cat <<-EOF
 +==================================================+
 |           SELECT THE CHOICES BELOW               |
@@ -221,11 +230,13 @@ Auto() {
     VmsTotal
      if  [[ ${REPLY} = $new ]]; then   
        VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
-       printf "%s " "'${listvms[${REPLY}]}' has been set to auto."
+       printf -v single "[%s] " "\"${listvms[${REPLY}]}\"" 
+       printf '%s ' "$single" "Has been set to auto."
        paused
      elif [[ ${REPLY} = [Aa] ]]; then
        AutoAll
-       printf "%s " "'${listvms[*]}' has been set to auto."
+       printf -v all "[%s] "  "${listvms[@]}"
+       printf '\n%s\n' "$all" "Has been set to auto."
        paused
      elif [[ ${REPLY} = [Rr] ]]; then
        return 0
@@ -245,17 +256,19 @@ Auto() {
 #                                                                                             #
 # ******************************************************************************************* #
 
-Manual(){
+Manual() {
   clear
   while true; do   
     VmsTotal
       if  [[ ${REPLY} = $new ]]; then
         VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
-        printf "%s " "'${listvms[${REPLY}]}' has been set to manual."
+        printf -v single "[%s] " "\"${listvms[${REPLY}]}\"" 
+        printf '%s ' "$single" "Has been set to manual."
         paused        
       elif [[ ${REPLY} = [Aa] ]]; then
         ManualAll 
-        printf "\n%s " "'${listvms[*]}' has been set to manual."
+        printf -v all "[%s] "  "${listvms[@]}"
+        printf '\n%s\n' "$all" "Has been set to manual." 
         paused
       elif [[ ${REPLY} = [Rr] ]]; then
         return 0    
@@ -276,14 +289,13 @@ Manual(){
 #                                                                                             #
 # ******************************************************************************************* #
 
-Status(){
+Status() {
  clear
   while true; do
     VmsTotal
       if  [[ ${REPLY} = $new ]]; then
-        mapfile -t result  < <(VBoxManage getextradata "${listvms[${REPLY}]}"  pvbx/startupMode)
-        Combined=("${listvms[${REPLY}]}" "${result[@]}")
-        echo "${Combined[@]}"
+        result=$(VBoxManage getextradata "${listvms[${REPLY}]}"  pvbx/startupMode)
+        printf '%s\n' "[\"${listvms[${REPLY}]}\"]=${result#*: }"
         paused
       elif [[ ${REPLY} = [Aa] ]]; then
         StatusAll
