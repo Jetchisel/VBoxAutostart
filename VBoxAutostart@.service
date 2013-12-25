@@ -1,7 +1,7 @@
 [Unit]
 Description=VBox Virtual Machine Service 
 Requires=systemd-modules-load.service 
-After=systemd-modules-load.service
+After=vboxdrv.service systemd-modules-load.service
 Before=shutdown.target reboot.target halt.target
 Documentation=man:systemd-vboxinit(1) file:///usr/share/doc/packages/systemd-vboxinit/README
 
