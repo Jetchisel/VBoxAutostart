@@ -4,7 +4,7 @@
 .SH NAME
 systemd-vboxinit - auto start/save of vbox vms during boot and shutdown.
 .SH SYNOPSIS
-systemd-vboxinit {start|stop}
+systemd-vboxinit {start|stop|license}
 .SH DESCRIPTION
 Systemd-vboxinit is wrapper script that manage VirtualBox's vms to auto start and auto save in batch. 
 Derived from "vboxinit" which came from the phpvirtualbox project which is based on vboxtool. It is
