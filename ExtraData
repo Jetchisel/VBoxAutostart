@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # =========================================================================================== #
-#                                                                                             #
 #: Title           : ExtraData                                                                #
 #: Sypnosis        : ExtraData                                                                #
 #: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
@@ -11,7 +10,6 @@
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
 #: Description     : Set extradata to auto or manual of your vms.                             #
 #: Options         : NONE                                                                     #
-#                                                                                             #
 # =========================================================================================== #
 
 # ******************************************************************************************* #
@@ -91,7 +89,7 @@ StatusAll() {
   mapfile -t stats < <(status)
 
   for i in "${!listvms[@]}"; do
-    printf '%s\n' "[\"${listvms[i]}\"]=${stats[i]#*: }"
+    printf '%s\n' "VirtualMachine[\"${listvms[i]}\"]=${stats[i]#*: }"
   done
 }
 
@@ -118,13 +116,13 @@ mapfile -t num < <(Num)
 paused() {
   while :; do
     printf "\n%s\n"
-    printf -v prompt "Press [Yy] to continue "
-      read -r -e -p "$prompt" -n1 button
-        case "$button" in
-          [Yy]) clear 
+    printf -v prompt "Press [Cc] to continue. "
+      read -r -e -p "$prompt" -n1 
+        case $REPLY in
+          [Cc]) clear 
                 return 0 
                 clear;;
-             *)  printf "%s\n" "Invalid answer!"
+             *) printf "%s\n" "Invalid answer!"
         esac
   done
 }
@@ -166,7 +164,7 @@ MainMenu() {
 3) CHECK STATUS OF VMS
 Q) EXIT
 
-=>
+(EnterInput) =>
 
 EOF
 
@@ -174,14 +172,14 @@ EOF
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                      The submenu.                                           #
+#                                      The submenus.                                          #
 #                                                                                             #
 # ******************************************************************************************* #
 
-SubMenu() {
+SubMenuAuto() {
   cat <<-EOF
 +==================================================+
-|        PRESS THE NUMBER OF THE VMS BELOW         |
+|        ENTER THE NUMBER OF THE VMS BELOW         |
 +==================================================+ 
 
 $(numbered)
@@ -189,7 +187,41 @@ A) SELECT All VMS
 R) RETURN TO MAIN MENU
 Q) EXIT
 
-=>
+(SetVmsToAuto) =>
+
+EOF
+
+}
+
+SubMenuManual() {
+  cat <<-EOF
++==================================================+
+|        ENTER THE NUMBER OF THE VMS BELOW         |
++==================================================+ 
+
+$(numbered)
+A) SELECT All VMS 
+R) RETURN TO MAIN MENU
+Q) EXIT
+
+(SetVmsToManual) =>
+
+EOF
+
+}
+
+SubMenuStatus() {
+  cat <<-EOF
++==================================================+
+|        ENTER THE NUMBER OF THE VMS BELOW         |
++==================================================+ 
+
+$(numbered)
+A) SELECT All VMS 
+R) RETURN TO MAIN MENU
+Q) EXIT
+
+(CheckVmsStatus) =>
 
 EOF
 
@@ -197,15 +229,31 @@ EOF
 
 # ******************************************************************************************* #
 #                                                                                             #
-#  Check if vms is more than 9, if it is then one click button is diabled in the SubMenu.     #
+#  Check if vms is more than 9. If it is, then one click button is diabled in the SubMenu.    #
 #                                                                                             #
 # ******************************************************************************************* #
 
-VmsTotal() {
+VmsTotalAuto() {
   if (( ${#listvms[@]} < 10  )); then
-    read -r -e -p "$sub_menu" -n1
+    read -r -e -p "$sub_menu_auto" -n1
   elif (( ${#listvms[@]} > 9 )); then
-    read -r -e -p "$sub_menu" 
+    read -r -e -p "$sub_menu_auto" 
+  fi
+}
+
+VmsTotalManual() {
+  if (( ${#listvms[@]} < 10  )); then
+    read -r -e -p "$sub_menu_manual" -n1
+  elif (( ${#listvms[@]} > 9 )); then
+    read -r -e -p "$sub_menu_manual" 
+  fi
+}
+
+VmsTotalStatus() {
+  if (( ${#listvms[@]} < 10  )); then
+    read -r -e -p "$sub_menu_status" -n1
+  elif (( ${#listvms[@]} > 9 )); then
+    read -r -e -p "$sub_menu_status" 
   fi
 }
 
@@ -216,7 +264,9 @@ VmsTotal() {
 # ******************************************************************************************* #
 
 printf -v main_menu "%s" "$(MainMenu) "
-printf -v sub_menu "%s" "$(SubMenu) "
+printf -v sub_menu_auto "%s" "$(SubMenuAuto) "
+printf -v sub_menu_manual "%s" "$(SubMenuManual) "
+printf -v sub_menu_status "%s" "$(SubMenuStatus) "
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -227,16 +277,16 @@ printf -v sub_menu "%s" "$(SubMenu) "
 Auto() {
   clear
   while true; do
-    VmsTotal
+    VmsTotalAuto
      if  [[ ${REPLY} = $new ]]; then   
        VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
-       printf -v single "[%s] " "\"${listvms[${REPLY}]}\"" 
-       printf '%s ' "$single" "Has been set to auto."
+       printf -v single "[\"%s\"] " "${listvms[${REPLY}]}" 
+       printf '\n%s\n' "VirtualMachine $single Has been set to AUTO."
        paused
      elif [[ ${REPLY} = [Aa] ]]; then
        AutoAll
-       printf -v all "[%s] "  "${listvms[@]}"
-       printf '\n%s\n' "$all" "Has been set to auto."
+       printf -v all "[\"%s\"] "  "${listvms[@]}"
+       printf '\n%s\n' "VirtualMachines: $all" "Has been set to AUTO."
        paused
      elif [[ ${REPLY} = [Rr] ]]; then
        return 0
@@ -259,16 +309,16 @@ Auto() {
 Manual() {
   clear
   while true; do   
-    VmsTotal
+    VmsTotalManual
       if  [[ ${REPLY} = $new ]]; then
         VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
-        printf -v single "[%s] " "\"${listvms[${REPLY}]}\"" 
-        printf '%s ' "$single" "Has been set to manual."
+        printf -v single "[\"%s\"] " "${listvms[${REPLY}]}" 
+        printf '\n%s\n' "VirtualMachine $single Has been set to MANUAL."
         paused        
       elif [[ ${REPLY} = [Aa] ]]; then
         ManualAll 
-        printf -v all "[%s] "  "${listvms[@]}"
-        printf '\n%s\n' "$all" "Has been set to manual." 
+        printf -v all "[\"%s\"] "  "${listvms[@]}"
+        printf '\n%s\n' "VirtualMachines: $all" "Has been set to MANUAL." 
         paused
       elif [[ ${REPLY} = [Rr] ]]; then
         return 0    
@@ -285,32 +335,33 @@ Manual() {
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                            Function to check status of then vms.                            #
+#                            Function to check status of the vms.                             #
 #                                                                                             #
 # ******************************************************************************************* #
 
 Status() {
- clear
-  while true; do
-    VmsTotal
-      if  [[ ${REPLY} = $new ]]; then
-        result=$(VBoxManage getextradata "${listvms[${REPLY}]}"  pvbx/startupMode)
-        printf '%s\n' "[\"${listvms[${REPLY}]}\"]=${result#*: }"
-        paused
-      elif [[ ${REPLY} = [Aa] ]]; then
-        StatusAll
-        paused
-      elif [[ ${REPLY} = [Rr] ]]; then
-        return 0
-        clear
-      elif [[ ${REPLY} = [Qq] ]]; then
-        clear
-        exit 0
-      else
-        printf "\n%s" "Invalid option!" >&2
-        Wait
-      fi
-  done
+  clear
+   while true; do
+     VmsTotalStatus
+       if  [[ ${REPLY} = $new ]]; then
+         result=$(VBoxManage getextradata "${listvms[${REPLY}]}"  pvbx/startupMode)
+         printf '\n%s\n' "VirtualMachine[\"${listvms[${REPLY}]}\"]=${result#*: }"
+         paused
+       elif [[ ${REPLY} = [Aa] ]]; then
+         echo
+         StatusAll
+         paused
+       elif [[ ${REPLY} = [Rr] ]]; then
+         return 0
+         clear
+       elif [[ ${REPLY} = [Qq] ]]; then
+         clear
+         exit 0
+       else
+         printf "\n%s" "Invalid option!" >&2
+         Wait
+       fi
+   done
 }
 
 # ******************************************************************************************* #
