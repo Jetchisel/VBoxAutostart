@@ -4,12 +4,12 @@
 #: Title           : systemd-vboxinit                                                         #
 #: Sypnosis        : systemd-vboxinit [OPTIONS]                                               #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                             #
-#: Last Edit       : Fri Dec 20 15:48:41 PHT 2013 / Fri Dec 20 07:49:17 UTC 2013              #
+#: Last Edit       : Fri Jan  3 11:51:40 PHT 2014 / Fri Jan  3 03:52:11 UTC 2014              #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.5                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped. #
-#: Options         : {stop|start}                                                             #
+#: Options         : {stop|start|license}                                                     #
 # =========================================================================================== #
 
 # ******************************************************************************************* #
@@ -20,10 +20,44 @@
 
 if ! type -P VirtualBox >/dev/null 2>&1; then
   if ! type -P virtualbox >/dev/null 2>&1; then
-    echo "VirtualBox is either not installed or is not in your PATH." >&2
+    echo "VirtualBox is either not installed or is not in your PATH!" >&2
     exit 1
   fi
 fi
+
+# ******************************************************************************************* #
+#                                                                                             #
+#              License function (required by GPL, see the LICENSE file)                       #
+#                                                                                             #
+# ******************************************************************************************* #
+
+license() { 
+    cat <<EOF
+    
+                     systemd-vboxinit 
+
+Auto start sessions when booting and save sessions when host is 
+stopped using systemd as its start up daemon.
+
+Copyright (C) 2013  Jason V. Ferrer  '<jetchisel@opensuse.org>'
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 3 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+(see The LICENSE file) along with this program; if not, write
+to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+Floor, Boston, MA  02110-1301, USA.
+
+EOF
+return
+}
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -36,7 +70,7 @@ ListVms() {
 }
 
 RunningVms() { 
-   while read -r vm; do
+  while read -r vm; do
     uuid=${vm##*"{"} 
     echo "${uuid%"}"*}"
   done < <(VBoxManage list runningvms) 
@@ -64,18 +98,19 @@ start() {
   while read -r line; do 
     uuid=${line##*"{"}
     uuid=${uuid%"}"*}
-    Vmname=${line#*\"}
-    Vmname=${Vmname%%\"*}
+    VmName=${line#*\"}
+    VmName=${VmName%%\"*}
   
     if [[ $(ExtraData) = *auto* ]]; then
       if ! grep -q "${uuid}" < <(RunningVms); then
-        printf '\n%s\n' "Starting Machine '$Vmname'..."
+        printf '\n%s\n' "Starting Machine '$VmName'..."
         StartVms
       else 
-        printf '\n%s\n' "Machine '$Vmname' is already running..."
+        printf '\n%s\n' "Machine '$VmName' is already running..."
       fi
     elif [[ $(ExtraData) != *auto* ]]; then
-      printf '\n%s\n' "Machine '$Vmname' is not set to auto...."
+      printf '\n%s\n' "Machine '$VmName' is not set to auto...."
+      echo
     fi 
   done < <(ListVms) 
 }
@@ -90,14 +125,15 @@ stop() {
    while read -r line; do 
      uuid=${line##*"{"}
      uuid=${uuid%"}"*}
-     Vmname=${line#*\"}
-     Vmname=${Vmname%%\"*} 
+     VmName=${line#*\"}
+     VmName=${VmName%%\"*} 
      
      if grep -q "${uuid}" < <(RunningVms); then
-       printf '\n%s\n' "Saving machine '$Vmname' state..."
+       printf '\n%s\n' "Saving machine '$VmName' state..."
        SaveVms
+       echo
      fi
-  done < <(ListVms)
+   done < <(ListVms)
 }
 
 # ******************************************************************************************** #
@@ -107,11 +143,9 @@ stop() {
 # ******************************************************************************************** #
 
 case $1 in
-  stop|start) "$1" 
-              ;;              
-           *) echo 'Usage {start|stop}' >&2 
-              exit 1
-              ;;
+  stop|start|license) "$1" ;;
+  *) echo "Usage: ${0##*/} {start|stop|license}" >&2 
+     exit 1 ;;
 esac
 
 # ******************************************************************************************** #
