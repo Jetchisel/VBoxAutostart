@@ -1,3 +1,6 @@
+# Unit file for systemd-vboxinit.
+# https://github.com/Jetchisel/VBoxAutostart 
+
 [Unit]
 Description=VBox Virtual Machine Service 
 Requires=systemd-modules-load.service 
@@ -13,7 +16,7 @@ Group=vboxusers
 RemainAfterExit=true
 StandardOutput=syslog+console
 ExecStart=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit start
-ExecStop=-/usr/lib/systemd-vboxini.d/systemd-vboxinit stop
+ExecStop=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit stop
 
 [Install]
 WantedBy=multi-user.target
