@@ -1,3 +1,6 @@
+# https://github.com/Jetchisel/VBoxAutostart
+# BashCompletion for systemd-vboxinit
+
 __systemd_vboxinit(){
   local cur prev opts
   cur="${COMP_WORDS[COMP_CWORD]}"
