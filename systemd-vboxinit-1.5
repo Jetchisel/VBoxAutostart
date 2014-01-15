@@ -65,10 +65,12 @@ ListVms() {
 }
 
 RunningVms() { 
-  while read -r vm; do
+  local uuid vm
+
+  while read -u7 -r vm; do
     uuid=${vm##*"{"} 
-    echo "${uuid%"}"*}"
-  done < <(ListRunningVms) 
+    printf '%s\n' "${uuid%"}"*}"
+  done 7< <(ListRunningVms) 2>/dev/null 
 }
 
 StartVms() {
@@ -86,7 +88,7 @@ SaveVms() {
 # ******************************************************************************************** #
 
 start() {
-  while read -r line; do 
+  while read -u8 -r line; do 
     uuid=${line##*"{"}
     uuid=${uuid%"}"*}
     VmName=${line#*\"}
@@ -103,7 +105,7 @@ start() {
       printf '\n%s\n' "Machine '$VmName' is not set to auto...."
       echo
     fi 
-  done < <(ListVms) 
+  done 8< <(ListVms) 
 }
 
 # ******************************************************************************************** #
@@ -113,7 +115,7 @@ start() {
 # ******************************************************************************************** #
 
 stop() {
-   while read -r line; do 
+   while read -u9 -r line; do 
      uuid=${line##*"{"}
      uuid=${uuid%"}"*}
      VmName=${line#*\"}
@@ -124,7 +126,7 @@ stop() {
        SaveVms
        echo
      fi
-   done < <(ListVms)
+   done 9< <(ListVms)
 }
 
 # ******************************************************************************************** #
