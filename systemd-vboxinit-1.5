@@ -4,7 +4,7 @@
 #: Title           : systemd-vboxinit                                                         #
 #: Sypnosis        : systemd-vboxinit [OPTIONS]                                               #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                             #
-#: Last Edit       : Thu Jan  9 15:45:45 PHT 2014 / Thu Jan  9 07:46:08 UTC 2014              #
+#: Last Edit       : Thu Jan 23 07:38:54 PHT 2014 / Wed Jan 22 23:39:18 UTC 2014              #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.5                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
@@ -12,6 +12,14 @@
 #: Options         : {stop|start|license}                                                     #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                               #
 # =========================================================================================== #
+
+# ******************************************************************************************* #
+#                                                                                             #
+#              Set the shell option so Uuids can be tested in one line.                       #
+#                                                                                             #
+# ******************************************************************************************* #
+
+shopt -s extglob
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -23,7 +31,7 @@ if ! type -P VirtualBox >/dev/null; then
   if ! type -P virtualbox >/dev/null; then
     if [[ ! -f /usr/lib/virtualbox/VirtualBox ]]; then
       echo "VirtualBox is either not installed or it's not in your PATH!" >&2
-      exit 1
+      exit 127
     fi
   fi
 fi
@@ -64,15 +72,6 @@ ListVms() {
   VBoxManage list vms
 }
 
-RunningVms() { 
-  local uuid vm
-
-  while read -u7 -r vm; do
-    uuid=${vm##*"{"} 
-    printf '%s\n' "${uuid%"}"*}"
-  done 7< <(ListRunningVms) 2>/dev/null 
-}
-
 StartVms() {
   VBoxManage startvm "$uuid" --type headless
 }
@@ -80,6 +79,21 @@ StartVms() {
 SaveVms() {
   VBoxManage controlvm "$uuid" savestate
 }
+
+# ******************************************************************************************** #
+#                                                                                              #
+#         Put the vms uuids in an array and in the variable Uuids using 'printf -v'.           #
+#                                                                                              #
+# ******************************************************************************************** #
+
+uuids=()
+while read -u7 -r vm; do
+  uuid=${vm##*"{"} 
+  uuids+=("${uuid%"}"*}")
+done 7< <(ListRunningVms)
+
+printf -v Uuids "%s|" "@(${uuids[@]})"
+Uuids=${Uuids%%|}
 
 # ******************************************************************************************** #
 #                                                                                              #
@@ -95,7 +109,7 @@ start() {
     VmName=${VmName%%\"*}
   
     if [[ $(ExtraData) = *auto* ]]; then
-      if ! grep -q "${uuid}" < <(RunningVms); then
+      if [[ $uuid != $Uuids ]]; then
         printf '\n%s\n' "Starting Machine '$VmName'..."
         StartVms
       else 
@@ -121,7 +135,7 @@ stop() {
      VmName=${line#*\"}
      VmName=${VmName%%\"*} 
      
-     if grep -q "${uuid}" < <(RunningVms); then
+     if [[ $uuid = $Uuids ]]; then
        printf '\n%s\n' "Saving machine '$VmName' state..."
        SaveVms
        echo
