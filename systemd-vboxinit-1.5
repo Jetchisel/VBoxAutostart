@@ -1,31 +1,31 @@
 #!/bin/bash
 
-# =========================================================================================== #
-#: Title           : systemd-vboxinit                                                         #
-#: Sypnosis        : systemd-vboxinit [OPTIONS]                                               #
-#: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                             #
-#: Last Edit       : Thu Jan 23 07:38:54 PHT 2014 / Wed Jan 22 23:39:18 UTC 2014              #
-#: License         : GPLv3                                                                    #
-#: Version         : 1.5                                                                      #
-#: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
-#: Description     : Auto start sessions when booting and save sessions when host is stopped. #
-#: Options         : {stop|start|license}                                                     #
-#: Home Page       : https://github.com/Jetchisel/VBoxAutostart                               #
-# =========================================================================================== #
+# ============================================================================================ #
+#: Title           : systemd-vboxinit                                                          #
+#: Sypnosis        : systemd-vboxinit [OPTIONS]                                                #
+#: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                              #
+#: Last Edit       : Thu Jan 23 07:38:54 PHT 2014 / Wed Jan 22 23:39:18 UTC 2014               #
+#: License         : GPLv3                                                                     #
+#: Version         : 1.5                                                                       #
+#: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
+#: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
+#: Options         : {stop|start|license}                                                      #
+#: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
+# ============================================================================================ #
 
-# ******************************************************************************************* #
-#                                                                                             #
-#              Set the shell option so Uuids can be tested in one line.                       #
-#                                                                                             #
-# ******************************************************************************************* #
+# ******************************************************************************************** #
+#                                                                                              #
+#              Set the shell option so Uuids can be tested in one line.                        #
+#                                                                                              #
+# ******************************************************************************************** #
 
 shopt -s extglob
 
-# ******************************************************************************************* #
-#                                                                                             #
-#              Check if VirtualBox is installed if not exit with an error.                    #
-#                                                                                             #
-# ******************************************************************************************* #
+# ******************************************************************************************** #
+#                                                                                              #
+#              Check if VirtualBox is installed if not exit with an error.                     #
+#                                                                                              #
+# ******************************************************************************************** #
 
 if ! type -P VirtualBox >/dev/null; then
   if ! type -P virtualbox >/dev/null; then
@@ -82,7 +82,7 @@ SaveVms() {
 
 # ******************************************************************************************** #
 #                                                                                              #
-#         Put the vms uuids in an array and in the variable Uuids using 'printf -v'.           #
+#     Put the running vms uuids in an array and in the variable "Uuids" using 'printf -v'.     #
 #                                                                                              #
 # ******************************************************************************************** #
 
