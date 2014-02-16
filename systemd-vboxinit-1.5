@@ -145,6 +145,27 @@ stop() {
 
 # ******************************************************************************************** #
 #                                                                                              #
+#                                       Usage Function.                                        #
+#                                                                                              #
+# ******************************************************************************************** #
+
+help() {
+   cat <<EOF
+
+Usage: ${BASH_SOURCE##*/} [OPTIONS] 
+
+Options:
+  start     Start enabled virtual machines otherwise show the state.
+  stop      Stop running virtual machines.
+  help      Show this help.
+  license   Show license.  
+
+EOF
+return
+}
+
+# ******************************************************************************************** #
+#                                                                                              #
 #              License function (required by GPL, see the LICENSE file)                        #
 #                                                                                              #
 # ******************************************************************************************** #
@@ -184,8 +205,8 @@ return
 # ******************************************************************************************** #
 
 case $1 in
-  stop|start|license) "$1" ;;
-  *) echo "Usage: ${0##*/} {start|stop|license}" >&2 
+  stop|start|license|help) "$1" ;;
+  *) help >&2
      exit 1 ;;
 esac
 
