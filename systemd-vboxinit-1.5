@@ -4,7 +4,7 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit [OPTIONS]                                                #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                              #
-#: Last Edit       : Thu Jan 23 07:38:54 PHT 2014 / Wed Jan 22 23:39:18 UTC 2014               #
+#: Last Edit       : Wed Feb 19 12:08:27 PHT 2014 / Wed Feb 19 04:08:27 UTC 2014               #
 #: License         : GPLv3                                                                     #
 #: Version         : 1.5                                                                       #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
@@ -97,17 +97,26 @@ Uuids=${Uuids%%|}
 
 # ******************************************************************************************** #
 #                                                                                              #
-#                          Function to start the vms Headless.                                 # 
+#    Save the Value of uuid and VmName variable in a Function to avoid repeating it twice.     # 
+#                                                                                              #
+# ******************************************************************************************** #
+
+Value() {
+  uuid=${line##*"{"}
+  uuid=${uuid%"}"*}
+  VmName=${line#*\"}
+  VmName=${VmName%%\"*}
+}
+
+# ******************************************************************************************** #
+#                                                                                              #
+#                             Function to start the vms Headless.                              # 
 #                                                                                              #
 # ******************************************************************************************** #
 
 start() {
   while read -u8 -r line; do 
-    uuid=${line##*"{"}
-    uuid=${uuid%"}"*}
-    VmName=${line#*\"}
-    VmName=${VmName%%\"*}
-  
+    Value
     if [[ $(ExtraData) = *auto* ]]; then
       if [[ $uuid != $Uuids ]]; then
         printf '\n%s\n' "Starting Machine '$VmName'..."
@@ -130,11 +139,7 @@ start() {
 
 stop() {
    while read -u9 -r line; do 
-     uuid=${line##*"{"}
-     uuid=${uuid%"}"*}
-     VmName=${line#*\"}
-     VmName=${VmName%%\"*} 
-     
+     Value
      if [[ $uuid = $Uuids ]]; then
        printf '\n%s\n' "Saving machine '$VmName' state..."
        SaveVms
