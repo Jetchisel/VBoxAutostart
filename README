@@ -73,7 +73,7 @@ want to avoid typing the long absolute PATH and you promise to be responsible :-
 a function in your "$HOME"/.bashrc like the code below.
 
 systemd-vboxinit(){ 
-  command /usr/lib/systemd-vboxinit.d/systemd-vboxinit "$1"
+  /usr/lib/systemd-vboxinit.d/systemd-vboxinit "$1"
 }
 
 
@@ -103,3 +103,5 @@ VirtualBox  is  a trademark of Oracle and others by their respective owners and 
 
 
 Enjoy folks....
+
+
