@@ -1,0 +1,121 @@
+--------------------------------------------------------------------------------------------------------------------
+Sat Feb 22 21:35:08 UTC 2014  '<jetchisel@opensuse.org>'
+
+- Updated man page for the short and long options.
+
+--------------------------------------------------------------------------------------------------------------------
+Fri Feb 21 23:01:04 UTC 2014  '<jetchisel@opensuse.org>'
+
+- Added support for long and short options for the OPTIONS.
+- Added short and long options for bash_completion.
+- Added additional checking if options/arguments is more than one.
+
+--------------------------------------------------------------------------------------------------------------------
+Wed Feb 19 04:29:58 UTC 2014 '<jetchisel@opensuse.org>'
+
+- Save the Value of uuid and VmName variable in a Function to avoid repeating it twice. 
+
+--------------------------------------------------------------------------------------------------------------------
+Wed Feb 12 20:59:29 UTC 2014  '<jetchisel@opensuse.org>'
+
+- Added the help function. 
+  * A more verbose explanation about the usage.
+- Replaced ${0} with ${BASH_SOURCE}.
+
+--------------------------------------------------------------------------------------------------------------------
+Wed Jan 22 23:39:18 UTC 2014  '<jetchisel@opensuse.org>'
+
+- Fix 'error broken pipe' by using a variable for the vms uuids instead of listing them using echo/printf.
+- Removed the '2>/dev/null' from 'error broken pipe' which just redirects stderr to nothing.
+- Added extglob so uuids can be tested in one line using '[[' instead of grep.
+- Since grep is external to the shell it is now removed.
+- The error 1 is replaced by 127 upon exit of systemd-vboxinit if it did not find VirtualBox or virtualbox.
+- This means that an executable is not found in your system. eg the exit status of 'cnf'.
+- See 'http://en.wikipedia.org/wiki/Exit_status' if you dont like 'man bash' EXIT STATUS section :-).
+
+--------------------------------------------------------------------------------------------------------------------
+Tue Jan 14 01:09:38 UTC 2014  '<jetchisel@opensuse.org>'
+
+- Fix 'error broken pipe'
+- If more than 5 vms are running the error broken pipe appears when stopping the daemon. (systemd!)
+- While stopping systemd-vboxinit manually that 'broken pipe' does not appear.
+- Added FD 7,8 and 9 to read inside the while loop.
+
+--------------------------------------------------------------------------------------------------------------------
+Thu Jan  9 07:46:08 UTC 2014  '<jetchisel@opensuse.org>'
+
+- version systemd-vboxinit-1.5-10.1
+- Added some more PATH checking for VirtualBox binaries/executables.
+- /usr/lib/virtualbox/VirtualBox is checked also from the begining.
+- Some custom install might not have VirtualBox and other binaries/executables in normal PATH.
+- /usr/lib/virtualbox/VBoxManage is used if it exist and executable by vboxusers.
+- else either VBoxManage or vboxmanage is searched in PATH and used.
+
+--------------------------------------------------------------------------------------------------------------------
+Thu Jan  2 02:20:08 UTC 2014 '<jetchisel@opensuse.org>'
+
+- version systemd-vboxinit-1.5-6.1
+- Added systemd-vboxinit-completion.bash
+- Tab completion should work now for its option start stop license.
+- running: /usr/lib/systemd-vboxinit.d/systemd-vboxinit <TAB> + <TAB> will show the options! (yey!)
+
+---------------------------------------------------------------------------------------------------------------------
+Thu Dec 26 09:31:07 UTC 2013 '<jetchisel@opensuse.org>'
+
+- systedm-vboxinit updated to version 1.5
+- Added the license function.
+
+---------------------------------------------------------------------------------------------------------------------
+Wed Dec 25 10:00:14 UTC 2013 '<jetchisel@opensuse.org>'
+
+- version 1.0-103.1
+- VBoxAutostart@.service now starts after vboxdrv.service.
+- Since vboxdrv is present from vbox.org package and the distro this is not an issue.
+- The need to add vboxdrv in /etc/sysconfig/kernel is not required anymore.
+- User is still responsible for disabling any other autostart service/script that can cause conflict. 
+
+---------------------------------------------------------------------------------------------------------------------
+Fri Dec 20 13:12:24 UTC 2013 '<jetchisel@opensuse.org>'
+
+- version 1.0-98.1
+- Removed VBoxManage showvminfo from systemd-vboxinit.
+- Only parsing VBoxManage list running/vms.
+- Parsing VBoxManage has been improved.
+- systemd-vboxinit can now handle vms names with white space! (Arrgg..!) 
+- ExtraData can also handle vms names with white space!
+
+---------------------------------------------------------------------------------------------------------------------
+Mon Dec 10 2013 - '<jetchisel@opensuse.org>'
+ 
+- Parsing VBoxManage for uuid has been made a bit more robust.
+- If in case your vms names has some silly character like { or }, you will not suffer! :-)
+
+---------------------------------------------------------------------------------------------------------------------
+Sat Nov 23 2013 - '<jetchisel@opensuse.org>'
+  
+- Fix the permission issue of systemd-vboxinit
+- When you install this package without installing virtualbox first then permission is messed up.
+- The previous default group is vboxusers which is created by virtualbox and if it is not installed, meaning no
+- vboxusers group exist in your system then it will fall back to root which a normal user does not have execute
+- rights to systemd-vboxinit.
+
+---------------------------------------------------------------------------------------------------------------------
+Wed Nov 6 2013 - '<jetchisel@opensuse.org>'
+
+- Moved systemd-vboxinit from /usr/bin to /usr/lib/systemd-vboxinit.d/ (which is created by systemd-vboxinit package)
+- /etc/init.d is for the legacy system V init scripts and LSB headers is a must!
+
+---------------------------------------------------------------------------------------------------------------------  
+Tue Oct 29  2013 - '<jetchisel@opensuse.org>'
+
+- Added this changelog file
+- Rename VBoxUser@.service to VBoxAutostart@.service
+- Sorry for the rename but *Autostart seems to be more appropriate :-), If you were left with a broken symlink you
+- can fix it with: find /etc/systemd/ -name '*VBoxUser*' -exec echo rm {} + 
+- remove the echo once your satisfied with the result.
+
+---------------------------------------------------------------------------------------------------------------------
+Mon Oct 26  2013 - '<jetchisel@opensuse.org>'
+
+- initial packaging
+

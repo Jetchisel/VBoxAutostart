@@ -1,7 +1,7 @@
 .\" Manpage for systemd-vboxinit
 .\" Contact jetchisel@opensuse.org to correct errors or typos.
 .TH SYSTEMD-VBOXINIT 1 "27 Oct 2013" "1.0" "systemd-vboxinit man page"
-.SH NAME
+.SH "NAME"
 systemd-vboxinit - auto start/save of vbox vms during boot and shutdown.
 .SH SYNOPSIS
 systemd-vboxinit {start|stop|license}
@@ -18,56 +18,63 @@ One need's to add the "auto" flag to the virtual machine in order for it  auto b
 startup and shutdown or reboot of the host. The virtual machines are then run in the background.
 (which is what a daemon is all about :-)). One can access the virtual machines by using ssh(1) or with the 
 gui tools such as  Krdc for KDE and the equivalent for other DE's. Example of commands are:
-
+.TP
 List the vms.
 
-  VBoxManage list vms
-
+.B  VBoxManage list vms
+.br
+.TP
 Set the "auto" flag to the vms.
 
-  VBoxManage setextradata vm-name pvbx/startupMode auto
-
+.B  VBoxManage setextradata vm-name pvbx/startupMode auto
+.br
+.TP
 Set the "manual" flag to the vms.
- 
-  VBoxManage setextradata vm_name pvbx/startupMode manual
- 
+
+.B  VBoxManage setextradata vm_name pvbx/startupMode manual
+
+.TP
 Where "vm_name" is the name of the virtual machine.
 
 .SH NOTE
- 
 It is not recommended to run systemd-vboxinit with root's right such as running it with the all time favorite sudo utility.
 Once one have set the "auto" flag to the virtual machines one can test it. One should invoke it as a normal user that belongs
 to the vboxusers group. 
 
- /usr/lib/systemd-vboxinit.d/systemd-vboxinit start
+.B /usr/lib/systemd-vboxinit.d/systemd-vboxinit start
 
- /usr/lib/systemd-vboxinit.d/systemd-vboxinit stop
+.B /usr/lib/systemd-vboxinit.d/systemd-vboxinit stop
 
 One should see the virtual machines starting and saving state. If that succeeded one should enable the daemon while the virtual
 machines are running and reboot.
 
 .SH USING THE DAEMON 
-
+.TP
 Start the service.
 
-  systemctl start VBoxAutostart@foo  
+.B systemctl start VBoxAutostart@foo  
 
+.TP
 Enable the service.
 
-  systemctl enable VBoxAutostart@foo
+.B  systemctl enable VBoxAutostart@foo
 
+.TP
 Check the status of the service
 
-  systemctl status VBoxAutostart@foo
+.B  systemctl status VBoxAutostart@foo
 
-  journalctl _SYSTEMD_UNIT=VBoxAutostart@foo.service
+.B  journalctl _SYSTEMD_UNIT=VBoxAutostart@foo.service
 
+.TP
 Restart the service.
 
-  systemctl restart VBoxAutostart@foo
-  
-Where foo is the username of the user who will use systemd-vboxinit. For multi-user one need's to start and enable the daemon with the
-specific username. One should consider the resources such as memory, cpu to be sufficient enough to run the vms.
+.B  systemctl restart VBoxAutostart@foo
+
+.br
+Where foo is the username of the user who will use systemd-vboxinit. 
+For multi-user one need's to start and enable the daemon with the specific username.
+One should consider the resources such as memory,cpu to be sufficient enough to run the vms.
 
 .SH README 
 
