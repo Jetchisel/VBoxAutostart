@@ -9,7 +9,7 @@
 #: Version         : 1.5                                                                       #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
-#: Options         : {stop|start|license|help}                                                 #
+#: Options         : {stop|start|license|help} / Short and long options are supported too.     #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
 # ============================================================================================ #
 
@@ -133,7 +133,7 @@ start() {
 
 # ******************************************************************************************** #
 #                                                                                              #
-#              Function to save vms state instead of shutting down completely.                 #
+#                Function to save vms state instead of shutting down completely.               #
 #                                                                                              #
 # ******************************************************************************************** #
 
@@ -160,10 +160,10 @@ help() {
 Usage: ${BASH_SOURCE##*/} [OPTIONS] 
 
 Options:
-  start     Start enabled virtual machines otherwise show the state.
-  stop      Stop running virtual machines.
-  help      Show this help.
-  license   Show license.  
+  --start, -start, start        Start enabled virtual machines otherwise show the state.
+  --stop,  -stop,  stop         Stop running virtual machines.
+  --help,  -help,  help         Show this help.
+  --license, -license, license  Show license.  
 
 EOF
 return
@@ -171,14 +171,14 @@ return
 
 # ******************************************************************************************** #
 #                                                                                              #
-#              License function (required by GPL, see the LICENSE file)                        #
+#                License function (required by GPL, see the LICENSE file)                      #
 #                                                                                              #
 # ******************************************************************************************** #
 
 license() { 
     cat <<EOF
     
-                     systemd-vboxinit 
+                     Systemd-vboxinit 
 
 Copyright (C) 2013  Jason V. Ferrer  '<jetchisel@opensuse.org>'
 
@@ -205,19 +205,28 @@ return
 
 # ******************************************************************************************** #
 #                                                                                              #
-#                              Check for a command line options.                               #
+#                            Check for a command line options.                                 #
 #                                                                                              #
 # ******************************************************************************************** #
 
-case $1 in
-  stop|start|license|help) "$1" ;;
-  *) help >&2
-     exit 1 ;;
-esac
+if (( $# > 1 )); then
+  printf '\n%s\n\n' "Too many arguments, try --help"
+  exit 1
+else
+  case $1 in
+    --stop|-stop|stop) stop;;
+    --start|-start|start) start;;
+    --license|-license|license) license;;
+    --help|help) help 
+                 exit 0;;
+    *) help >&2
+       exit 1 ;;
+  esac
+fi
 
 # ******************************************************************************************** #
 #                                                                                              #
-#                                   Set the exit staus.                                        #
+#                                     Set the exit staus.                                      #
 #                                                                                              #
 # ******************************************************************************************** #
 
@@ -225,6 +234,6 @@ exit 0
 
 # ============================================================================================ #
 #                                                                                              #
-#                                  >>> END OF SCRIPT <<<                                       #
+#                                    >>> END OF SCRIPT <<<                                     #
 #                                                                                              #
 # ============================================================================================ #
