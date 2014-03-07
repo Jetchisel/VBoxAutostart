@@ -5,7 +5,7 @@ __systemd_vboxinit(){
   local cur prev opts
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
-  opts="{--,-,}stop {--,-,}start {--,-,}help {--,-,}license"
+  opts="-s {--,}stop -x {--,}start -h {--,}help -l {--,}license"
   
   if [[ ${cur} == * ]] ; then
      mapfile -t COMPREPLY < <(compgen -W "${opts}" -- ${cur})
@@ -14,4 +14,3 @@ __systemd_vboxinit(){
 }
 
 complete -o nospace -F __systemd_vboxinit  systemd-vboxinit
- 

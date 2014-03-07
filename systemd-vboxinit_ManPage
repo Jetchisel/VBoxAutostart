@@ -4,7 +4,13 @@
 .SH "NAME"
 systemd-vboxinit - auto start/save of vbox vms during boot and shutdown.
 .SH SYNOPSIS
-systemd-vboxinit {start|stop|license}
+systemd-vboxinit [OPTIONS]
+.SH OPTIONS
+  -x, --start,   start    Start enabled virtual machines otherwise show the state.
+  -s, --stop,    stop     Stop all running virtual machines enabled or not.
+  -h, --help,    help     Show this help.
+  -l, --license, license  Show license.  
+
 .SH DESCRIPTION
 Systemd-vboxinit is wrapper script that manage VirtualBox's vms to auto start and auto save in batch. 
 Derived from "vboxinit" which came from the phpvirtualbox project which is based on vboxtool. It is
@@ -14,8 +20,8 @@ with systemd as it's startup daemon. ( which should work for other distro that i
 .SH MANAGE VMS
 
 At creation time of the vms the extradata with the key "pvbx/startupMode" has no value (Which is ignored).
-One need's to add the "auto" flag to the virtual machine in order for it  auto boot and auto save during 
-startup and shutdown or reboot of the host. The virtual machines are then run in the background.
+One need's to enable it by adding the "auto" flag to the virtual machine in order for it  auto boot and
+auto save during startup and shutdown or reboot of the host. The virtual machines are then run in the background.
 (which is what a daemon is all about :-)). One can access the virtual machines by using ssh(1) or with the 
 gui tools such as  Krdc for KDE and the equivalent for other DE's. Example of commands are:
 .TP

@@ -4,7 +4,7 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit [OPTIONS]                                                #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                              #
-#: Last Edit       : Wed Feb 19 12:08:27 PHT 2014 / Wed Feb 19 04:08:27 UTC 2014               #
+#: Last Edit       : Fri Mar  7 04:44:05 PHT 2014 / Thu Mar  6 20:44:05 UTC 2014               #
 #: License         : GPLv3                                                                     #
 #: Version         : 1.5                                                                       #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
@@ -160,10 +160,10 @@ help() {
 Usage: ${BASH_SOURCE##*/} [OPTIONS] 
 
 Options:
-  start,   -start,   --start      Start enabled virtual machines otherwise show the state.
-  stop,    -stop,    --stop       Stop all running virtual machines enabled or not.
-  help,    -help,    --help       Show this help.
-  license, -license, --license    Show license.  
+  -x, --start,   start    Start enabled virtual machines otherwise show the state.
+  -s, --stop,    stop     Stop all running virtual machines enabled or not.
+  -h, --help,    help     Show this help.
+  -l, --license, license  Show license.  
 
 EOF
 return
@@ -214,14 +214,12 @@ if (( $# > 1 )); then
   exit 1
 else
   case $1 in
-    --stop|-stop|stop) stop;;
-    --start|-start|start) start;;
-    --license|-license|license) license;;
-    --help|help) help 
-                 exit 0;;
-    *) help >&2
-       exit 1 ;;
-  esac
+       --stop|-s|stop) stop;;
+     --start|-x|start) start;;
+       --help|-h|help) help; exit 0;;
+ --license|-l|license) license;;           
+                    *) help >&2; exit 1;;
+   esac
 fi
 
 # ******************************************************************************************** #
