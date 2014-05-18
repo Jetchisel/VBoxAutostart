@@ -1,21 +1,31 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # =========================================================================================== #
 #: Title           : ExtraData                                                                #
 #: Sypnosis        : ExtraData                                                                #
 #: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
-#: Last Edit       : Fri 20 Dec 20:14:23 PHT 2013 / Fri 20 Dec 12:14:43 UTC 2013              #
+#: Last Edit       : Tue May 13 04:16:47 PHT 2014 / Mon May 12 20:16:47 UTC 2014              #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.0                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
-#: Description     : Set extradata to auto or manual of your vms.                             #
+#: Description     : Set extradata to auto or manual of VirtualBox's vms.                     #
 #: Options         : NONE                                                                     #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                               #
+#: ExtComm         : cat,clear,sleep,tput,VBoxManage                                          #       
 # =========================================================================================== #
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                   Set shell option to have multiple test and avoid regexp.                  #
+#     Reset the font to normal on quit and force exit/quit via ctrl-c and other signals.      #
+#                                                                                             #
+# ******************************************************************************************* #
+
+trap 'tput sgr0' 0
+trap 'exit 2' 1 2 3 15
+
+# ******************************************************************************************* #
+#                                                                                             #
+#                  Set shell option to have multiple test and avoid regexp.                   #
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -23,19 +33,17 @@ shopt -s extglob
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                list only the vms names.                                     #
+#                 list only the vms names and save it in an array listvms.                    #
 #                                                                                             #
 # ******************************************************************************************* #
 
-Listvms() {
-  while read -r line; do 
-    Vmname=${line#*\"}
-    Vmname=${Vmname%%\"*}
-    echo "$Vmname"
-  done < <(VBoxManage list vms)
-}
+listvms=()
 
-mapfile -t listvms < <(Listvms)
+while read -u6 -r line; do 
+  Vmname=${line#*'"'}
+  Vmname=${Vmname%'"'*}
+  listvms+=("$Vmname")
+done 6< <(VBoxManage list vms)
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -44,20 +52,20 @@ mapfile -t listvms < <(Listvms)
 # ******************************************************************************************* #
 
 numbered() { 
-  for i in "${!listvms[@]}"; do
-    printf "%s\n" "${listvms[i]/#/$i) }"
+  for vm in "${!listvms[@]}"; do
+    printf "%s\n" "${listvms[vm]/#/$vm) }"
   done
 }
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                         Function to  set all the vms to auto.                               #
+#                          Function to set all the vms to auto.                               #
 #                                                                                             #
 # ******************************************************************************************* #
 
 AutoAll() {
-  for vm in "${listvms[@]}"; do
-    VBoxManage setextradata "${vm}" pvbx/startupMode auto 
+  for vm in "${!listvms[@]}"; do
+    VBoxManage setextradata "${listvms[vm]}" pvbx/startupMode auto 
   done
 }
 
@@ -68,29 +76,29 @@ AutoAll() {
 # ******************************************************************************************* #
 
 ManualAll() {
-  for vm in "${listvms[@]}"; do
-    VBoxManage setextradata "${vm}" pvbx/startupMode manual
+  for vm in "${!listvms[@]}"; do
+    VBoxManage setextradata "${listvms[vm]}" pvbx/startupMode manual
   done
 }
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                 Get status of all the vms                                   #
+#                         Function to Get status of all the vms.                              #
 #                                                                                             #
 # ******************************************************************************************* #
 
 StatusAll() {
 
   status() {
-    for vm in "${listvms[@]}"; do
-      VBoxManage getextradata "${vm}" pvbx/startupMode
+    for vm in "${!listvms[@]}"; do
+      VBoxManage getextradata "${listvms[vm]}" pvbx/startupMode
     done
   }
 
   mapfile -t stats < <(status)
 
-  for i in "${!listvms[@]}"; do
-    printf '%s\n' "VirtualMachine[\"${listvms[i]}\"]=${stats[i]#*: }"
+  for vm in "${!listvms[@]}"; do
+    printf '%s\n' "VirtualMachine[\"${listvms[vm]}\"]=${stats[vm]#*: }"
   done
 }
 
@@ -100,37 +108,45 @@ StatusAll() {
 #                                                                                             #
 # ******************************************************************************************* #
 
-Num() {
-  while read -r line; do
-    echo "${line[@]%)*}"
-  done < <(numbered)
-}
+num=()
 
-mapfile -t num < <(Num)
+while read -u7 -r line; do
+  num+=("${line[@]%)*}")
+done 7< <(numbered)
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                  User has the time to review the output and ask to coninue.                 #
+#       Function to pause so user has the time to review the output and ask to coninue.       #
 #                                                                                             #
 # ******************************************************************************************* #
 
 paused() {
   while :; do
     printf "\n%s\n"
-    printf -v prompt "Press [Cc] to continue. "
+    printf -v prompt "Press [c] to continue. "
       read -r -e -p "$prompt" -n1 
         case $REPLY in
           [Cc]) clear 
                 return 0 
                 clear;;
-             *) printf "%s\n" "Invalid answer!"
+             *) printf "%s\n" "Invalid answer!" >&2
         esac
   done
 }
 
 # ******************************************************************************************* #
 #                                                                                             #
-#              Wait for 1 second so user can see the output and clear the screen.             #
+#                            Function to print an invalid message.                            #
+#                                                                                             #
+# ******************************************************************************************* #
+
+InValid() {
+  printf "\n%s" "Invalid option!" >&2
+}
+
+# ******************************************************************************************* #
+#                                                                                             #
+#       Function to wait for 1 second so user can see the output and clear the screen.        #
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -141,7 +157,7 @@ Wait(){
 
 # ******************************************************************************************* #
 #                                                                                             #
-#             Format the numbers in the array so it can be tested  in one line.               #
+#              Format the numbers in the array so it can be tested  in one line.              #
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -150,16 +166,26 @@ new=${new%%|}
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                        The main menu when the script started.                               #
+#       The Header with the Message in between the LongBar. Formatted with "printf -v".       #
 #                                                                                             #
 # ******************************************************************************************* #
 
+Message='|            PRESS THE NUMBER/LETTER OF THE CHOICES BELOW           |'
+LongBar='+===================================================================+'
+
+printf -v Header '%s\n' "$LongBar" "$Message" "$LongBar"
+
+# ******************************************************************************************* #
+#                                                                                             #
+#   Function to print main menu when the script is started. (Bold fonts up to the submenus)   #
+#                                                                                             #
+# ******************************************************************************************* #
+
+bold=$(tput bold)
+
 MainMenu() {
   cat <<-EOF
-+==================================================+
-|           SELECT THE CHOICES BELOW               |
-+==================================================+
-
+${bold}$Header
 1) SET VMS TO AUTO
 2) SET VMS TO MANUAL
 3) CHECK STATUS OF VMS
@@ -173,20 +199,29 @@ EOF
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                      The submenus.                                          #
+#                          Additional options for the submenus.                               #
+#                                                                                             #
+# ******************************************************************************************* #
+
+OtherOptions() {
+  cat <<-EOF 
+A) SELECT All VMS 
+R) RETURN TO MAIN MENU
+Q) EXIT
+EOF
+}
+
+# ******************************************************************************************* #
+#                                                                                             #
+#                             Functions for the submenus.                                     #
 #                                                                                             #
 # ******************************************************************************************* #
 
 SubMenuAuto() {
   cat <<-EOF
-+==================================================+
-|        ENTER THE NUMBER OF THE VMS BELOW         |
-+==================================================+ 
-
+$Header
 $(numbered)
-A) SELECT All VMS 
-R) RETURN TO MAIN MENU
-Q) EXIT
+$(OtherOptions)
 
 (SetVmsToAuto) =>
 
@@ -196,14 +231,9 @@ EOF
 
 SubMenuManual() {
   cat <<-EOF
-+==================================================+
-|        ENTER THE NUMBER OF THE VMS BELOW         |
-+==================================================+ 
-
+$Header
 $(numbered)
-A) SELECT All VMS 
-R) RETURN TO MAIN MENU
-Q) EXIT
+$(OtherOptions)
 
 (SetVmsToManual) =>
 
@@ -213,49 +243,14 @@ EOF
 
 SubMenuStatus() {
   cat <<-EOF
-+==================================================+
-|        ENTER THE NUMBER OF THE VMS BELOW         |
-+==================================================+ 
-
+$Header
 $(numbered)
-A) SELECT All VMS 
-R) RETURN TO MAIN MENU
-Q) EXIT
+$(OtherOptions)
 
 (CheckVmsStatus) =>
 
 EOF
 
-}
-
-# ******************************************************************************************* #
-#                                                                                             #
-#  Check if vms is more than 9. If it is, then one click button is diabled in the SubMenu.    #
-#                                                                                             #
-# ******************************************************************************************* #
-
-VmsTotalAuto() {
-  if (( ${#listvms[@]} < 10  )); then
-    read -r -e -p "$sub_menu_auto" -n1
-  elif (( ${#listvms[@]} > 9 )); then
-    read -r -e -p "$sub_menu_auto" 
-  fi
-}
-
-VmsTotalManual() {
-  if (( ${#listvms[@]} < 10  )); then
-    read -r -e -p "$sub_menu_manual" -n1
-  elif (( ${#listvms[@]} > 9 )); then
-    read -r -e -p "$sub_menu_manual" 
-  fi
-}
-
-VmsTotalStatus() {
-  if (( ${#listvms[@]} < 10  )); then
-    read -r -e -p "$sub_menu_status" -n1
-  elif (( ${#listvms[@]} > 9 )); then
-    read -r -e -p "$sub_menu_status" 
-  fi
 }
 
 # ******************************************************************************************* #
@@ -271,6 +266,32 @@ printf -v sub_menu_status "%s" "$(SubMenuStatus) "
 
 # ******************************************************************************************* #
 #                                                                                             #
+#             If vms is more than 9, one click button is disabled in the SubMenu's.           #
+#                                                                                             #
+# ******************************************************************************************* #
+
+OneClick() {
+  if (( ${#listvms[@]} < 10  )); then
+    read -r -e -p "$1" -n1
+  elif (( ${#listvms[@]} > 9 )); then
+    read -r -e -p "$1" 
+  fi
+}
+
+VmsTotalAuto() {
+  OneClick "$sub_menu_auto" 
+}
+
+VmsTotalManual() {
+  OneClick "$sub_menu_manual" 
+}
+
+VmsTotalStatus() {
+  OneClick "$sub_menu_status" 
+}
+
+# ******************************************************************************************* #
+#                                                                                             #
 #                               Function to set vms to auto.                                  #
 #                                                                                             #
 # ******************************************************************************************* #
@@ -282,12 +303,12 @@ Auto() {
      if  [[ ${REPLY} = $new ]]; then   
        VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
        printf -v single "[\"%s\"] " "${listvms[${REPLY}]}" 
-       printf '\n%s\n' "VirtualMachine $single Has been set to AUTO."
+       printf '\n%s\n' "VirtualMachine $single is now on AUTO."
        paused
      elif [[ ${REPLY} = [Aa] ]]; then
        AutoAll
-       printf -v all "[\"%s\"] "  "${listvms[@]}"
-       printf '\n%s\n' "VirtualMachines: $all" "Has been set to AUTO."
+       printf -v all "[\"%s\"]\n" "${listvms[@]}"
+       printf '%s\n' "" "VirtualMachine(s):" "" "$all" "Is now on AUTO."
        paused
      elif [[ ${REPLY} = [Rr] ]]; then
        return 0
@@ -295,7 +316,7 @@ Auto() {
        clear
        exit 0
      else  
-       printf "\n%s" "Invalid option!" >&2
+       InValid
        Wait
      fi
   done
@@ -303,7 +324,7 @@ Auto() {
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                                 Function to set vms to manual.                              #
+#                                Function to set vms to manual.                               #
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -314,12 +335,12 @@ Manual() {
       if  [[ ${REPLY} = $new ]]; then
         VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
         printf -v single "[\"%s\"] " "${listvms[${REPLY}]}" 
-        printf '\n%s\n' "VirtualMachine $single Has been set to MANUAL."
+        printf '\n%s\n' "VirtualMachine $single is now on MANUAL."
         paused        
       elif [[ ${REPLY} = [Aa] ]]; then
         ManualAll 
-        printf -v all "[\"%s\"] "  "${listvms[@]}"
-        printf '\n%s\n' "VirtualMachines: $all" "Has been set to MANUAL." 
+        printf -v all "[\"%s\"]\n"  "${listvms[@]}"
+        printf '%s\n' "" "VirtualMachine(s):" "" "$all" "is now on MANUAL." 
         paused
       elif [[ ${REPLY} = [Rr] ]]; then
         return 0    
@@ -328,7 +349,7 @@ Manual() {
         clear
         exit 0    
       else
-        printf "\n%s" "Invalid option!" >&2
+        InValid
         Wait
       fi
   done
@@ -359,7 +380,7 @@ Status() {
          clear
          exit 0
        else
-         printf "\n%s" "Invalid option!" >&2
+         InValid
          Wait
        fi
    done
@@ -382,7 +403,7 @@ while true; do
           clear ;;
     [Qq]) clear
           exit 0;;
-       *) printf "\n%s" "Invalid option!" >&2
+       *) InValid
           Wait
           clear ;;
     esac
@@ -398,6 +419,6 @@ exit 0
 
 # ============================================================================================ #
 #                                                                                              # 
-#                                  >>> END OF SCRIPT <<<                                       #
+#                                   >>> END OF SCRIPT <<<                                      #
 #                                                                                              #
 # ============================================================================================ # 

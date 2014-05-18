@@ -1,13 +1,15 @@
 # https://github.com/Jetchisel/VBoxAutostart
-# BashCompletion for systemd-vboxinit
+# BashCompletion for systemd-vboxinit.
+# Only long-options.
 
 __systemd_vboxinit(){
-  local cur prev opts
+  local cur prev opts 
+  
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
-  opts="-s {--,}stop -x {--,}start -h {--,}help -l {--,}license"
+  opts='--about --disable --help --license --start --stop'
   
-  if [[ ${cur} == * ]] ; then
+  if [[ ${cur} = * ]] ; then
      mapfile -t COMPREPLY < <(compgen -W "${opts}" -- ${cur})
      return 0
   fi

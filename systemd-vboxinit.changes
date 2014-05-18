@@ -1,4 +1,38 @@
 --------------------------------------------------------------------------------------------------------------------
+Sat May 17 22:01:41 UTC 2014 '<jetchisel@opensuse.org>'
+
+- version 1.6
+- Added mapfile and fd 5 to it, for checking if there is any vms.
+- The disable option relies heavily on pgrep and pkill.
+- Removed comm and ps, added killproc(8) for openSuSE.
+- Added a function to check if there is no vms, then exit if there is none found.
+- Added the find command to list files inside /usr/lib/virtualbox, pgrep to check if it is running process.
+- openSuSE has a killproc which is used to kill a process/daemon. If not available, fall back to pkill :-).
+- Fixed the output status of a vm that is running but not on auto when started.
+- Fixed the P.E. for extracting VmNames the extra '%' was removed, It fails on VmNames with double quotes :-). 
+- Fixed an empty array value for the NoAutoVms which prints a litteral single quotes.
+- Fixed/improved code in ExtraData script. The fonts are now bold :-).
+
+--------------------------------------------------------------------------------------------------------------------
+Mon May  5 20:12:18 UTC 2014 '<jetchisel@opensuse.org>'
+
+- Updated to version 1.6
+- Added external commands comm and ps for processmanagenemt :-)
+- Added fd 6
+
+--------------------------------------------------------------------------------------------------------------------
+Fri Apr 25 17:47:27 UTC 2014 '<jetchisel@opensuse.org>'
+
+- Only short and long options remain in the options.
+- Tab completion only works for long-options. (it is better this way :-))
+- Added about and disable options.
+- Switch to forking instead of oneshot (in the unit file type entry) for systemd-208 which is openSuSE 13.1
+- The disable option is a must before updating to another version of VirtualBox, to avoid install errors. (if any)
+- Restart of vboxweb-service is needed after the disable option specially  when using app. such as phpvirtualbox.
+- --stop is -x and --start is -s for short and long options.
+- Grep is back :-), for checking vbox kernel modules.
+
+--------------------------------------------------------------------------------------------------------------------
 Thu Mar  6 20:44:05 UTC 2014 '<jetchisel@opensuse.org>'
 
 - Improved the short and long options.

@@ -29,6 +29,9 @@ the following commands as root.
 
  grub2-mkconfig -o /boot/grub2/grub.cfg
 
+ 
+OpenSuSE has "yast2 bootloader" for doing such task.
+
 --------------------------------------------------------------------------------------------------
 
 If  you  want  to  run  your vms (without running it at the background) after logging in and
@@ -48,8 +51,13 @@ Running it with the "sdl" option.
 
   ex -sc '%s/headless/sdl/ge|x' systemd-vboxinit
 
+  
+Add the code below in your autostart file/script (during log-in).
 
-Just be prepared to be met with your vms when you log-in :-), Dont forget to disable the VBoxAu-
+  /usr/lib/systemd-vboxinit.d/systemd-vboxinit --start
+
+
+Just be prepared to be greeted with your vms when you log-in :-), Dont forget to disable the VBoxAu-
 tostart daemon!
 -----------------------------------------------------------------------------------------------------
 
@@ -57,9 +65,9 @@ For some convenience setting/getting extrada to your virtual  machines  copy the
 (which came with this package and should be in the same directory as this README) to your "$HOME"-
 /bin and make it executable. As a normal user run the following.
 
-  cp -v ExtraData "$HOME"/bin
+  cp -v ExtraData "${HOME}/bin"
 
-  chmod +x "$HOME"/bin/ExtraData
+  chmod +x "${HOME}/bin/ExtraData"
 
 Now call the script.
 
@@ -69,17 +77,24 @@ Now call the script.
 
 The reason systemd-vboxinit was moved from /usr/bin to /usr/lib/systemd-vboxinit.d/ is to avoid
 accidentally stopping your virtual machines by simply running systemd-vboxinit stop. Now if you 
-want to avoid typing the long absolute PATH and you promise to be responsible :-) you can create
-a function in your "$HOME"/.bashrc like the code below.
+want to avoid typing the long absolute PATH and you promise to be responsible :-), there are two
+options.
 
-systemd-vboxinit(){ 
-  /usr/lib/systemd-vboxinit.d/systemd-vboxinit "$1"
+
+1.) Using a function in your "${HOME}/.bashrc" like the code below and save it.
+ 
+ 
+systemd-vboxinit() { 
+  vboxinit=/usr/lib/systemd-vboxinit.d/systemd-vboxinit
+  if [[ -f $vboxinit && -x $vboxinit ]]; then
+    /usr/lib/systemd-vboxinit.d/systemd-vboxinit "$@"
+  fi
 }
 
 
-And then source it run:  
+And then source it, run:  
 
-  source "$HOME"/.bashrc
+  source "${HOME}/.bashrc"
 
 After that you can just run:
 
@@ -87,13 +102,32 @@ After that you can just run:
 
 This solution avoids messing with PATH.
 
+2.) If you really prefer to use the PATH solution, for OpenSUSE add the code below to your
+    "${HOME}/.profile"  and save it. Check the documentation of your distro if your are not 
+    using openSUSE.
+
+  
+  if [[ -f /usr/lib/systemd-vboxinit.d/systemd-vboxinit && -x /usr/lib/systemd/systemd-vboxinit ]]; then
+    PATH=$PATH:/usr/lib/systemd-vboxinit.d
+  fi
+
+  
+And then source it, run:  
+
+  . "${HOME}/.profile"
+
+After that you can just run:
+
+  systemd-vboxinit <TAB> + <TAB>
+
 ------------------------------------------------------------------------------------------------------
 
 One more to thing to add is that you do not need to configure or edit some config files in order for 
 your virtual machines to autostart and save state. Multi-user support is easy, just replace the user
 name after the @ sign in VBoxAutostart  service and enable the VBoxAutostart daemon one  time as root 
-or with your all time favorite sudo utility then as a normal user you can set the "auto" flag to the
-virtual machines that you want to autostart and autosave and viola!
+or with your all time favorite sudo utility. (Just keep in mind the host needs resources too!) then as
+a normal user you can set the "auto" flag to the virtual machines that you want to autostart/autosave 
+and viola!
   
 ------------------------------------------------------------------------------------------------------
 
