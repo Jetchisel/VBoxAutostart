@@ -11,7 +11,7 @@
 #: Description     : Set extradata to auto or manual of VirtualBox's vms.                     #
 #: Options         : NONE                                                                     #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                               #
-#: ExtComm         : cat,clear,sleep,tput,VBoxManage                                          #       
+#: ExtComm         : clear,sleep,tput,VBoxManage                                              #       
 # =========================================================================================== #
 
 # ******************************************************************************************* #
@@ -124,13 +124,13 @@ paused() {
   while :; do
     printf "\n%s\n"
     printf -v prompt "Press [c] to continue. "
-      read -r -e -p "$prompt" -n1 
-        case $REPLY in
-          [Cc]) clear 
-                return 0 
-                clear;;
-             *) printf "%s\n" "Invalid answer!" >&2
-        esac
+    read -r -e -p "$prompt" -n1 
+    case $REPLY in
+      [Cc]) clear 
+            return 0 
+            clear;;
+         *) printf "%s\n" "Invalid answer!" >&2
+    esac
   done
 }
 
@@ -162,7 +162,7 @@ Wait(){
 # ******************************************************************************************* #
 
 printf -v new "%s|" "@(${num[@]})"
-new=${new%%|} 
+new=${new%|} 
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -177,25 +177,25 @@ printf -v Header '%s\n' "$LongBar" "$Message" "$LongBar"
 
 # ******************************************************************************************* #
 #                                                                                             #
-#   Function to print main menu when the script is started. (Bold fonts up to the submenus)   #
+#          The main menu when the script is started. (Bold fonts up to the submenus)          #
 #                                                                                             #
 # ******************************************************************************************* #
 
+BlankSpace=
 bold=$(tput bold)
 
-MainMenu() {
-  cat <<-EOF
-${bold}$Header
-1) SET VMS TO AUTO
-2) SET VMS TO MANUAL
-3) CHECK STATUS OF VMS
-Q) EXIT
+Main_Menu=(
+  "${bold}$Header"
+  "1) SET VMS TO AUTO"
+  "2) SET VMS TO MANUAL"
+  "3) CHECK STATUS OF VMS"
+  "Q) EXIT"
+  "$BlankSpace"
+  "(EnterInput) =>"
+)
 
-(EnterInput) =>
-
-EOF
-
-}
+printf -v MainMenu '%s\n' "${Main_Menu[@]}"
+MainMenu=${MainMenu%$'\n'}
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -203,70 +203,62 @@ EOF
 #                                                                                             #
 # ******************************************************************************************* #
 
-OtherOptions() {
-  cat <<-EOF 
-A) SELECT All VMS 
-R) RETURN TO MAIN MENU
-Q) EXIT
-EOF
-}
+Other_Options=(
+  "A) SELECT All VMS"
+  "R) RETURN TO MAIN MENU"
+  "Q) EXIT"
+)
+
+printf -v OtherOptions '%s\n' "${Other_Options[@]}"
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                             Functions for the submenus.                                     #
+#                                     The SubMenus                                            #
 #                                                                                             #
 # ******************************************************************************************* #
 
-SubMenuAuto() {
-  cat <<-EOF
-$Header
-$(numbered)
-$(OtherOptions)
+SubMenuAuto=(
+  "$Header"
+  "$(numbered)"
+  "${OtherOptions}"
+  "$BlankSpace"
+  "(SetVmsToAuto) =>"
+)
 
-(SetVmsToAuto) =>
+SubMenuManual=(
+  "$Header"
+  "$(numbered)"
+  "${OtherOptions}"
+  "$BlankSpace"
+  "(SetVmsToManual) =>"
+)
 
-EOF
-
-}
-
-SubMenuManual() {
-  cat <<-EOF
-$Header
-$(numbered)
-$(OtherOptions)
-
-(SetVmsToManual) =>
-
-EOF
-
-}
-
-SubMenuStatus() {
-  cat <<-EOF
-$Header
-$(numbered)
-$(OtherOptions)
-
-(CheckVmsStatus) =>
-
-EOF
-
-}
+SubMenuStatus=(
+  "$Header"
+  "$(numbered)"
+  "${OtherOptions}"
+  "$BlankSpace"
+  "(CheckVmsStatus) =>"
+)
 
 # ******************************************************************************************* #
 #                                                                                             #
-#                Save the Menu's to a variable so read can present it properly.               #
+#       Format the Menu's to a variable using printf -v so read can present it properly.      #
 #                                                                                             #
 # ******************************************************************************************* #
 
-printf -v main_menu "%s" "$(MainMenu) "
-printf -v sub_menu_auto "%s" "$(SubMenuAuto) "
-printf -v sub_menu_manual "%s" "$(SubMenuManual) "
-printf -v sub_menu_status "%s" "$(SubMenuStatus) "
+printf -v sub_menu_auto '%s\n' "${SubMenuAuto[@]}"
+sub_menu_auto=${sub_menu_auto%$'\n'}
+
+printf -v sub_menu_manual '%s\n' "${SubMenuManual[@]}"
+sub_menu_manual=${sub_menu_manual%$'\n'}
+
+printf -v sub_menu_status '%s\n' "${SubMenuStatus[@]}"
+sub_menu_status=${sub_menu_status%$'\n'}
 
 # ******************************************************************************************* #
 #                                                                                             #
-#             If vms is more than 9, one click button is disabled in the SubMenu's.           #
+#           If vms is more than 9, one click button is disabled in the SubMenu's.             #
 #                                                                                             #
 # ******************************************************************************************* #
 
@@ -279,15 +271,15 @@ OneClick() {
 }
 
 VmsTotalAuto() {
-  OneClick "$sub_menu_auto" 
+  OneClick "$sub_menu_auto " 
 }
 
 VmsTotalManual() {
-  OneClick "$sub_menu_manual" 
+  OneClick "$sub_menu_manual " 
 }
 
 VmsTotalStatus() {
-  OneClick "$sub_menu_status" 
+  OneClick "$sub_menu_status " 
 }
 
 # ******************************************************************************************* #
@@ -308,7 +300,7 @@ Auto() {
      elif [[ ${REPLY} = [Aa] ]]; then
        AutoAll
        printf -v all "[\"%s\"]\n" "${listvms[@]}"
-       printf '%s\n' "" "VirtualMachine(s):" "" "$all" "Is now on AUTO."
+       printf '%s\n' "$BlankSpace" "VirtualMachine(s):" "$BlankSpace" "$all" "Is now on AUTO."
        paused
      elif [[ ${REPLY} = [Rr] ]]; then
        return 0
@@ -340,7 +332,7 @@ Manual() {
       elif [[ ${REPLY} = [Aa] ]]; then
         ManualAll 
         printf -v all "[\"%s\"]\n"  "${listvms[@]}"
-        printf '%s\n' "" "VirtualMachine(s):" "" "$all" "is now on MANUAL." 
+        printf '%s\n' "$BlankSpace" "VirtualMachine(s):" "$BlankSpace" "$all" "is now on MANUAL." 
         paused
       elif [[ ${REPLY} = [Rr] ]]; then
         return 0    
@@ -394,7 +386,7 @@ Status() {
 
 while true; do
   clear
-  read -r -e -p "$main_menu" -n1
+  read -r -e -p "${MainMenu} " -n1
     case ${REPLY} in 
        1) Auto  ;;
        2) Manual
@@ -409,16 +401,16 @@ while true; do
     esac
 done
 
-# ******************************************************************************************** #
-#                                                                                              #
-#                                   Set the exit staus.                                        #
-#                                                                                              #
-# ******************************************************************************************** #
+# ******************************************************************************************* #
+#                                                                                             #
+#                                   Set the exit staus.                                       #
+#                                                                                             #
+# ******************************************************************************************* #
 
 exit 0
 
-# ============================================================================================ #
-#                                                                                              # 
-#                                   >>> END OF SCRIPT <<<                                      #
-#                                                                                              #
-# ============================================================================================ # 
+# =========================================================================================== #
+#                                                                                             # 
+#                                   >>> END OF SCRIPT <<<                                     #
+#                                                                                             #
+# =========================================================================================== # 
