@@ -4,7 +4,7 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit [OPTIONS]                                                #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                              #
-#: Last Edit       : Mon May 19 04:11:20 PHT 2014 / Sun May 18 20:11:20 UTC 2014               #
+#: Last Edit       : Sat Aug 16 07:32:54 PHT 2014 / Fri Aug 15 23:31:54 UTC 2014               #
 #: License         : GPLv3                                                                     #
 #: Version         : 1.6                                                                       #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
@@ -24,16 +24,35 @@ shopt -s extglob
 
 # ******************************************************************************************** #
 #                                                                                              #
+#   Warn and die functions, for exit messages and default status or an optional exit status.   #
+#                                                                                              #
+# ******************************************************************************************** #
+
+warn() {
+  printf '%s\n' "${BASH_SOURCE##*/}: $@" >&2
+}
+
+die() {
+  local st=$?
+  case $2 in
+    *[^0-9]*|'') :;;
+    *) st=$2;;
+  esac
+  warn "$1"
+  exit "$st"
+}
+
+# ******************************************************************************************** #
+#                                                                                              #
 #              Check if VirtualBox is installed if not exit with an error.                     #
 #                                                                                              #
 # ******************************************************************************************** #
 
-if ! type -P VirtualBox >/dev/null 2>&1; then
-  if ! type -P virtualbox >/dev/null 2>&1; then
-    if [[ ! -f /usr/lib/virtualbox/VirtualBox ]]; then 
-      echo "VirtualBox is either not installed or it's not in your PATH!" >&2
-      exit 127
-    fi
+NotInstalledMessage="VBoxManage is either not installed or it's not in your PATH!"
+
+if ! type -P VBoxManage >/dev/null; then
+  if ! type -P vboxmanage >/dev/null; then
+    [[ -f /usr/lib/virtualbox/VBoxManage ]] || die "$NotInstalledMessage"
   fi
 fi
 
@@ -43,10 +62,7 @@ fi
 #                                                                                              #
 # ******************************************************************************************** #
 
-if ! grep -q "vboxdrv[^_-]" < <(lsmod); then 
-  echo 'vboxdrv is not loaded!' >&2
-  exit 1
-fi
+grep -q "^vboxdrv[^_-]" < <(lsmod) || die "vboxdrv is not loaded!"
 
 # ******************************************************************************************** #
 #                                                                                              #
@@ -54,7 +70,7 @@ fi
 #                                                                                              #
 # ******************************************************************************************** #
 
-[[ -d /usr/lib/virtualbox ]] && VBoxDir=/usr/lib/virtualbox
+VBoxDir=/usr/lib/virtualbox
 
 # ******************************************************************************************** #
 #                                                                                              #
@@ -102,13 +118,13 @@ SaveVms() {
 
 # ******************************************************************************************** #
 #                                                                                              #
-#            Function to check for vms. If there is none found exit with an error.             #
+#           Function to check for vms. If there is none found exit without an error.           #
 #                                                                                              #
 # ******************************************************************************************** #
 
 NoVmExit() {
   mapfile -u5 -t AllVms 5< <(ListVms)
-  (( ${#AllVms[@]} )) || { echo 'No virtual machine found!' >&2; exit 1; }
+  (( ${#AllVms[@]} )) || die "No virtual machine found!" 0
 }
 
 # ******************************************************************************************** #
@@ -124,7 +140,7 @@ while read -u6 -r vm; do
 done 6< <(ListRunningVms)
 
 printf -v RunningUuids "%s|" "@(${uuids[@]})"
-RunningUuids=${RunningUuids%%|}
+RunningUuids=${RunningUuids%|}
 
 # ******************************************************************************************** #
 #                                                                                              #
@@ -202,29 +218,27 @@ start() {
 # ******************************************************************************************** #
 
 stop() {
-   (( ${#uuids[@]} )) || { echo 'No virtual machine runnning!'; }
+   (( ${#uuids[@]} )) || die "No virtual machine runnning!" 0
    while read -u8 -r line; do 
      ExtractVmNameUuid
-     if [[ $AllUuid = $RunningUuids ]]; then
-       printf '%s\n' "Saving machine '$VmName' state..."
-       SaveVms
-     fi
-   done 8< <(ListVms)
+     printf '%s\n' "Saving machine '$VmName' state..."
+     SaveVms
+   done 8< <(ListRunningVms)
 }
 
 # ******************************************************************************************** #
 #                                                                                              #
-#    find files inside /usr/lib/virtualbox, where vbox executables reside including daemons.   #
+#  Function to print/list files/executables (without extension) inside /usr/lib/virtualbox.    #
 #                                                                                              #
 # ******************************************************************************************** #
 
 VBoxDaemons() { 
-  find "$VBoxDir" -type f -iname '*vbox*'
+  find "$VBoxDir" -type f -iname '*v*box*' \! -name '*.*' -print 
 }
 
 # ******************************************************************************************** #
 #                                                                                              #
-#    Function to save-state of the vms and stop vbox daemons in preparation for an update.     #
+# Function to save-state of the runningvms and stop vbox daemons in preparation for an update. #
 #                                                                                              #
 # ******************************************************************************************** #
 #----------------------------------------------------------------------------------------------#
@@ -232,19 +246,24 @@ VBoxDaemons() {
 #----------------------------------------------------------------------------------------------#
 
 disable() {
-  stop 
+  (( ${#uuids[@]} )) || die "No virtual machine running!" 0
+
+  echo 'Saving the sate of all running vms...'
+  for l in "${!uuids[@]}"; do
+    VBoxManage controlvm "${uuids[l]}" savestate
+  done
+  
   while read -u9 -r daemon; do
     daemon=${daemon##*/}
-    if [[  $daemon != *.* ]]; then
-      if pgrep -u "$USER" -x "$daemon" >/dev/null; then
-        if [[ -f /sbin/killproc && -x /sbin/killproc ]]; then
-          /sbin/killproc "$daemon"
-        else
-          pkill -15 "$daemon"
-        fi
+    if pgrep -u "$USER" -x -- "$daemon" >/dev/null; then
+      if [[ -f /sbin/killproc && -x /sbin/killproc ]]; then
+         /sbin/killproc -- "$daemon" 
+      else 
+        pkill -15 -- "$daemon" 
       fi
     fi
   done 9< <(VBoxDaemons)  
+  
   echo "All VirtualBox process that is owned by $USER has been stopped."
 }
 
@@ -257,7 +276,7 @@ disable() {
 help() {
    cat <<EOF
 
-Usage: ${BASH_SOURCE##*/} [OPTIONS] 
+Usage: ${BASH_SOURCE##*/} [OPTION] 
 
 Options:
   -s, --start    Start enabled virtual machines otherwise show the state.
@@ -313,7 +332,7 @@ return
 
 license() {
   lisensya=/usr/share/doc/packages/systemd-vboxinit/LICENSE
-  [[ -f $lisensya ]] || { echo "Can't find license!" >&2 ; exit 1; }
+  [[ -f $lisensya ]] || die "Can't find license file: $lisensya" 
   less /usr/share/doc/packages/systemd-vboxinit/LICENSE
   return 
 }
@@ -324,10 +343,7 @@ license() {
 #                                                                                              #
 # ******************************************************************************************** #
 
-if (( $# > 1 )); then
-  printf '\n%s\n\n' "${BASH_SOURCE##*/} Too many arguments, try --help" >&2
-  exit 1
-fi
+(( $# <= 1 )) || die "Too many arguments, try --help"
 
 case $1 in
    --about|-a) about;;
