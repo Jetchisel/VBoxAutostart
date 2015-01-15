@@ -2,16 +2,16 @@
 
 # ============================================================================================ #
 #: Title           : systemd-vboxinit                                                          #
-#: Sypnosis        : systemd-vboxinit [OPTIONS]                                                #
+#: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                              #
-#: Last Edit       : Sat Aug 16 07:32:54 PHT 2014 / Fri Aug 15 23:31:54 UTC 2014               #
+#: Last Edit       : Fri Dec 12 15:21:06 PHT 2014 / Fri Dec 12 07:21:14 UTC 2014               #
 #: License         : GPLv3                                                                     #
 #: Version         : 1.6                                                                       #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : --{about,stop,start,disable,license,help}                                 #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
-#: ExtComm         : cat,find,grep,killproc,less,lsmod,pgrep,pkill,VBoxManage                  #
+#: ExtComm         : cat,find,grep,killproc,less,pgrep,pkill,VBoxManage                        #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
@@ -62,7 +62,7 @@ fi
 #                                                                                              #
 # ******************************************************************************************** #
 
-grep -q "^vboxdrv[^_-]" < <(lsmod) || die "vboxdrv is not loaded!"
+grep -q "^vboxdrv" /proc/modules || die "vboxdrv is not loaded!"
 
 # ******************************************************************************************** #
 #                                                                                              #
@@ -246,9 +246,12 @@ VBoxDaemons() {
 #----------------------------------------------------------------------------------------------#
 
 disable() {
-  (( ${#uuids[@]} )) || die "No virtual machine running!" 0
-
-  echo 'Saving the sate of all running vms...'
+  if (( ! ${#uuids[@]} )); then 
+    echo "No virtual machine running!"
+  else
+    echo 'Saving the state of all running vms...'
+  fi
+  
   for l in "${!uuids[@]}"; do
     VBoxManage controlvm "${uuids[l]}" savestate
   done
@@ -276,7 +279,7 @@ disable() {
 help() {
    cat <<EOF
 
-Usage: ${BASH_SOURCE##*/} [OPTION] 
+Usage: ${BASH_SOURCE##*/} OPTION 
 
 Options:
   -s, --start    Start enabled virtual machines otherwise show the state.
@@ -301,7 +304,7 @@ about() {
     
                      Systemd-vboxinit 
 
-Copyright (C) 2013  Jason V. Ferrer  '<jetchisel@opensuse.org>'
+Copyright (C) 2013-2014 Jason V. Ferrer '<jetchisel@opensuse.org>'
 
 Auto start sessions when booting and save sessions when host is 
 stopped using systemd as its start up daemon.

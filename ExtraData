@@ -4,14 +4,14 @@
 #: Title           : ExtraData                                                                #
 #: Sypnosis        : ExtraData                                                                #
 #: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
-#: Last Edit       : Tue May 13 04:16:47 PHT 2014 / Mon May 12 20:16:47 UTC 2014              #
+#: Last Edit       : Fri Dec 12 15:21:06 PHT 2014 / Fri Dec 12 07:21:14 UTC 2014              #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.0                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
 #: Description     : Set extradata to auto or manual of VirtualBox's vms.                     #
 #: Options         : NONE                                                                     #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                               #
-#: ExtComm         : clear,sleep,tput,VBoxManage                                              #       
+#: ExtComm         : clear,sleep,tput,VBoxManage                                              #
 # =========================================================================================== #
 
 # ******************************************************************************************* #
@@ -20,8 +20,8 @@
 #                                                                                             #
 # ******************************************************************************************* #
 
-trap 'tput sgr0' 0
-trap 'exit 2' 1 2 3 15
+trap 'tput sgr0;echo' 0
+trap 'exit 2;echo' 1 2 3 15
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -47,15 +47,28 @@ done 6< <(VBoxManage list vms)
 
 # ******************************************************************************************* #
 #                                                                                             #
+#                                     The colors.                                             #
+#                                                                                             #
+# ******************************************************************************************* #
+
+bold=$(tput bold)
+gb=$(tput setaf 2 && tput bold)
+reset=$(tput sgr0)
+
+# ******************************************************************************************* #
+#                                                                                             #
 #              Prints the vms with it's corresponding number within the array.                #
 #                                                                                             #
 # ******************************************************************************************* #
 
-numbered() { 
-  for vm in "${!listvms[@]}"; do
-    printf "%s\n" "${listvms[vm]/#/$vm) }"
-  done
-}
+numbered=()
+num=()
+
+for vm in "${!listvms[@]}"; do
+  num+=("$vm")
+  numbered+=("${listvms[vm]/#/${gb}$vm${reset}) }")
+done
+
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -101,18 +114,6 @@ StatusAll() {
     printf '%s\n' "VirtualMachine[\"${listvms[vm]}\"]=${stats[vm]#*: }"
   done
 }
-
-# ******************************************************************************************* #
-#                                                                                             #
-#                  Get only the respective number of the vms in the array.                    #
-#                                                                                             #
-# ******************************************************************************************* #
-
-num=()
-
-while read -u7 -r line; do
-  num+=("${line[@]%)*}")
-done 7< <(numbered)
 
 # ******************************************************************************************* #
 #                                                                                             #
@@ -164,13 +165,17 @@ Wait(){
 printf -v new "%s|" "@(${num[@]})"
 new=${new%|} 
 
+
+
 # ******************************************************************************************* #
 #                                                                                             #
 #       The Header with the Message in between the LongBar. Formatted with "printf -v".       #
 #                                                                                             #
 # ******************************************************************************************* #
 
-Message='|            PRESS THE NUMBER/LETTER OF THE CHOICES BELOW           |'
+ColoredChoice=${gb}NUMBER${reset}/${gb}LETTER${reset}
+
+Message="|            PRESS THE $ColoredChoice OF THE CHOICES BELOW           |"
 LongBar='+===================================================================+'
 
 printf -v Header '%s\n' "$LongBar" "$Message" "$LongBar"
@@ -182,14 +187,13 @@ printf -v Header '%s\n' "$LongBar" "$Message" "$LongBar"
 # ******************************************************************************************* #
 
 BlankSpace=
-bold=$(tput bold)
 
 Main_Menu=(
-  "${bold}$Header"
-  "1) SET VMS TO AUTO"
-  "2) SET VMS TO MANUAL"
-  "3) CHECK STATUS OF VMS"
-  "Q) EXIT"
+  "$Header"
+  "${gb}1${reset}) SET VMS TO AUTO"
+  "${gb}2${reset}) SET VMS TO MANUAL"
+  "${gb}3${reset}) CHECK STATUS OF VMS"
+  "${gb}Q${reset}) EXIT"
   "$BlankSpace"
   "(EnterInput) =>"
 )
@@ -204,9 +208,9 @@ MainMenu=${MainMenu%$'\n'}
 # ******************************************************************************************* #
 
 Other_Options=(
-  "A) SELECT All VMS"
-  "R) RETURN TO MAIN MENU"
-  "Q) EXIT"
+  "${gb}A${reset}) SELECT All VMS"
+  "${gb}R${reset}) RETURN TO MAIN MENU"
+  "${gb}Q${reset}) EXIT"
 )
 
 printf -v OtherOptions '%s\n' "${Other_Options[@]}"
@@ -219,7 +223,7 @@ printf -v OtherOptions '%s\n' "${Other_Options[@]}"
 
 SubMenuAuto=(
   "$Header"
-  "$(numbered)"
+  "${numbered[@]}"
   "${OtherOptions}"
   "$BlankSpace"
   "(SetVmsToAuto) =>"
@@ -227,7 +231,7 @@ SubMenuAuto=(
 
 SubMenuManual=(
   "$Header"
-  "$(numbered)"
+  "${numbered[@]}"
   "${OtherOptions}"
   "$BlankSpace"
   "(SetVmsToManual) =>"
@@ -235,7 +239,7 @@ SubMenuManual=(
 
 SubMenuStatus=(
   "$Header"
-  "$(numbered)"
+  "${numbered[@]}"
   "${OtherOptions}"
   "$BlankSpace"
   "(CheckVmsStatus) =>"
@@ -410,7 +414,7 @@ done
 exit 0
 
 # =========================================================================================== #
-#                                                                                             # 
+#                                                                                             #
 #                                   >>> END OF SCRIPT <<<                                     #
 #                                                                                             #
-# =========================================================================================== # 
+# =========================================================================================== #
