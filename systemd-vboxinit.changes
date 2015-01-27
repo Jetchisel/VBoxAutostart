@@ -1,4 +1,10 @@
 --------------------------------------------------------------------------------------------------------------------
+Tue Jan 27 08:03:24 UTC 2015 '<jetchisel@opensuse.org>'
+
+- Set exit status to 1 if argument is more than 1.
+- Fix error checking if arguments is more than 1.
+
+--------------------------------------------------------------------------------------------------------------------
 Tue Jan 27 05:28:55 UTC 2015 '<jetchisel@opensuse.org>'
 
 - Update to version 2.0.0

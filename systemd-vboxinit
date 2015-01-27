@@ -4,9 +4,9 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Tue Jan 27 11:39:05 PHT 2015 / Tue Jan 27 03:39:05 UTC 2015               #
+#: Last Edit       : Tue Jan 27 15:58:14 PHT 2015 / Tue Jan 27 07:58:14 UTC 2015               #
 #: License         : GPLv3                                                                     #
-#: Version         : 2.0.0                                                                     #
+#: Version         : 2.0.1                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : --{about,stop,start,disable,license,help}                                 #
@@ -359,7 +359,7 @@ license() {
 #                                                                                              #
 # ******************************************************************************************** #
 
-(( $# > 1 )) && die "Too many arguments, try --help"
+(( $# > 1 )) && die "Too many arguments, try --help" 1
 
 case $1 in
    --about|-a) about;;
