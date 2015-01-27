@@ -359,7 +359,7 @@ license() {
 #                                                                                              #
 # ******************************************************************************************** #
 
-(( $# <= 1 )) || die "Too many arguments, try --help"
+(( $# > 1 )) && die "Too many arguments, try --help"
 
 case $1 in
    --about|-a) about;;
