@@ -3,15 +3,15 @@
 # ============================================================================================ #
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
-#: Date Created    : Wed Oct  2 07:57:25 PHT 2013                                              #
-#: Last Edit       : Fri Dec 12 15:21:06 PHT 2014 / Fri Dec 12 07:21:14 UTC 2014               #
+#: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
+#: Last Edit       : Tue Jan 27 11:39:05 PHT 2015 / Tue Jan 27 03:39:05 UTC 2015               #
 #: License         : GPLv3                                                                     #
-#: Version         : 1.6                                                                       #
+#: Version         : 2.0.0                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : --{about,stop,start,disable,license,help}                                 #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
-#: ExtComm         : cat,find,grep,killproc,less,pgrep,pkill,VBoxManage                        #
+#: ExtComm         : cat,find,grep,less,pgrep,pkill,VBoxManage                                 #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
@@ -58,6 +58,26 @@ fi
 
 # ******************************************************************************************** #
 #                                                                                              #
+#        Check for the required app/executable is with in your PATH, exit otherwise.           #
+#                                                                                              #
+# ******************************************************************************************** #
+
+Missing=()
+ExtComm=(cat find grep less pgrep pkill)
+MissingMessage="is either not installed or it is not in your PATH!"
+ExitMessage="Please install the following: $@"
+
+for apps in "${ExtComm[@]}"; do
+  if ! type -P "$apps" >/dev/null; then
+    echo "$apps $MissingMessage" >&2
+    Missing+=("$apps")
+  fi
+done
+
+(( ! ${#Missing[@]} )) || die "$ExitMessage[${Missing[*]}] exiting now!"
+
+# ******************************************************************************************** #
+#                                                                                              #
 #           Check if vboxdrv kernel module is loaded if not exit with an error.                #
 #                                                                                              #
 # ******************************************************************************************** #
@@ -78,7 +98,7 @@ VBoxDir=/usr/lib/virtualbox
 #                                                                                              #
 # ******************************************************************************************** #
 
-VBoxManage() { 
+VBoxManage() {
   if [[ -f $VBoxDir/VBoxManage && -x $VBoxDir/VBoxManage ]]; then
       "${VBoxDir}"/VBoxManage "$@"
   else
@@ -135,7 +155,7 @@ NoVmExit() {
 
 uuids=()
 while read -u6 -r vm; do
-  running_uuid=${vm##*"{"} 
+  running_uuid=${vm##*"{"}
   uuids+=("${running_uuid%"}"*}")
 done 6< <(ListRunningVms)
 
@@ -144,7 +164,7 @@ RunningUuids=${RunningUuids%|}
 
 # ******************************************************************************************** #
 #                                                                                              #
-#  Function to sanitize/extract the vmname and uuid using P.E. inside the start,stop function. # 
+#  Function to sanitize/extract the vmname and uuid using P.E. inside the start,stop function. #
 #                                                                                              #
 # ******************************************************************************************** #
 
@@ -157,7 +177,7 @@ ExtractVmNameUuid() {
 
 # ******************************************************************************************** #
 #                                                                                              #
-#          Function to print the vms status when started, e.g. running,auto,noauto.            # 
+#          Function to print the vms status when started, e.g. running,auto,noauto.            #
 #                                                                                              #
 # ******************************************************************************************** #
 
@@ -168,34 +188,34 @@ VmStatus() {
       printf '%s\n' "Machine '${RunningVms[i]}' is already running..."
     done
   fi
-  
+
   if (( ${#NoAutoRunning} )); then
     echo
     for j in "${!NoAutoRunning[@]}"; do
       printf '%s\n' "Machine '${NoAutoRunning[j]}' is already running but not on auto..."
     done
   fi
-  
+
   if (( ${#NoAutoVms[@]} )); then
     echo
     for k in "${!NoAutoVms[@]}"; do
       printf '%s\n' "Machine '${NoAutoVms[k]}' is not set to auto..."
     done
-  fi  
+  fi
 }
 
 # ******************************************************************************************** #
 #                                                                                              #
-#                             Function to start the vms Headless.                              # 
+#                             Function to start the vms Headless.                              #
 #                                                                                              #
 # ******************************************************************************************** #
 
 start() {
   NoVmExit
   NoAutoVms=() RunningVms=() NoAutoRunning=()
-  
-  while read -u7 -r line; do 
-    ExtractVmNameUuid   
+
+  while read -u7 -r line; do
+    ExtractVmNameUuid
     if [[ $(ExtraData) = *auto* && $AllUuid != $RunningUuids ]]; then
       printf '\n%s\n' "Starting Machine '$VmName'..."
       StartVms
@@ -205,9 +225,9 @@ start() {
       RunningVms+=("$VmName")
     elif [[ $(ExtraData) != *auto* ]]; then
       NoAutoVms+=("$VmName")
-    fi 
-  done 7< <(ListVms) 
-  
+    fi
+  done 7< <(ListVms)
+
   VmStatus
 }
 
@@ -219,7 +239,7 @@ start() {
 
 stop() {
    (( ${#uuids[@]} )) || die "No virtual machine runnning!" 0
-   while read -u8 -r line; do 
+   while read -u8 -r line; do
      ExtractVmNameUuid
      printf '%s\n' "Saving machine '$VmName' state..."
      SaveVms
@@ -232,8 +252,8 @@ stop() {
 #                                                                                              #
 # ******************************************************************************************** #
 
-VBoxDaemons() { 
-  find "$VBoxDir" -type f -iname '*v*box*' \! -name '*.*' -print 
+VBoxDaemons() {
+  find "$VBoxDir" -type f -iname '*v*box*' \! -name '*.*' -print
 }
 
 # ******************************************************************************************** #
@@ -241,32 +261,25 @@ VBoxDaemons() {
 # Function to save-state of the runningvms and stop vbox daemons in preparation for an update. #
 #                                                                                              #
 # ******************************************************************************************** #
-#----------------------------------------------------------------------------------------------#
-# TODO: Better ProcessManagement? killproc(8) is (open)SuSE's speficic tool, but pkill is not. # 
-#----------------------------------------------------------------------------------------------#
 
 disable() {
-  if (( ! ${#uuids[@]} )); then 
+  if (( ! ${#uuids[@]} )); then
     echo "No virtual machine running!"
   else
     echo 'Saving the state of all running vms...'
   fi
-  
+
   for l in "${!uuids[@]}"; do
     VBoxManage controlvm "${uuids[l]}" savestate
   done
-  
+
   while read -u9 -r daemon; do
     daemon=${daemon##*/}
     if pgrep -u "$USER" -x -- "$daemon" >/dev/null; then
-      if [[ -f /sbin/killproc && -x /sbin/killproc ]]; then
-         /sbin/killproc -- "$daemon" 
-      else 
-        pkill -15 -- "$daemon" 
-      fi
+       pkill -15 -- "$daemon"
     fi
-  done 9< <(VBoxDaemons)  
-  
+  done 9< <(VBoxDaemons)
+
   echo "All VirtualBox process that is owned by $USER has been stopped."
 }
 
@@ -279,7 +292,7 @@ disable() {
 help() {
    cat <<EOF
 
-Usage: ${BASH_SOURCE##*/} OPTION 
+Usage: ${BASH_SOURCE##*/} OPTION
 
 Options:
   -s, --start    Start enabled virtual machines otherwise show the state.
@@ -299,14 +312,14 @@ return
 #                                                                                              #
 # ******************************************************************************************** #
 
-about() { 
+about() {
     cat <<EOF
-    
-                     Systemd-vboxinit 
 
-Copyright (C) 2013-2014 Jason V. Ferrer '<jetchisel@opensuse.org>'
+                     Systemd-vboxinit
 
-Auto start sessions when booting and save sessions when host is 
+Copyright (C) 2013-2015 Jason V. Ferrer '<jetchisel@opensuse.org>'
+
+Auto start sessions when booting and save sessions when host is
 stopped using systemd as its start up daemon.
 
 This program is free software; you can redistribute it and/or
@@ -335,9 +348,9 @@ return
 
 license() {
   lisensya=/usr/share/doc/packages/systemd-vboxinit/LICENSE
-  [[ -f $lisensya ]] || die "Can't find license file: $lisensya" 
+  [[ -f $lisensya ]] || die "Can't find license file: $lisensya"
   less /usr/share/doc/packages/systemd-vboxinit/LICENSE
-  return 
+  return
 }
 
 # ******************************************************************************************** #
@@ -354,7 +367,7 @@ case $1 in
     --help|-h) help; exit 0;;
    --start|-s) start;;
     --stop|-x) stop;;
- --license|-l) license;;           
+ --license|-l) license;;
             *) help >&2; exit 1;;
 esac
 
