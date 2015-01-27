@@ -1,4 +1,14 @@
 --------------------------------------------------------------------------------------------------------------------
+Tue Jan 27 05:28:55 UTC 2015 '<jetchisel@opensuse.org>'
+
+- Update to version 2.0.0
+- Update Change log
+- Tag to version 2.0.0
+- Remove the need for killproc.
+- Change the date of copyright to 2015.
+- Add the check for the rest of external commands.
+
+--------------------------------------------------------------------------------------------------------------------
 Fri Aug 15 23:31:54 UTC 2014 '<jetchisel@opensuse.org>'
 
 - Fixed the exit status of the -d flag from systemd-vboxinit script.
@@ -23,7 +33,7 @@ Sat May 17 22:01:41 UTC 2014 '<jetchisel@opensuse.org>'
 - Added the find command to list files inside /usr/lib/virtualbox, pgrep to check if it is running process.
 - openSuSE has a killproc which is used to kill a process/daemon. If not available, fall back to pkill :-).
 - Fixed the output status of a vm that is running but not on auto when started.
-- Fixed the P.E. for extracting VmNames the extra '%' was removed, It fails on VmNames with double quotes :-). 
+- Fixed the P.E. for extracting VmNames the extra '%' was removed, It fails on VmNames with double quotes :-).
 - Fixed an empty array value for the NoAutoVms which prints a litteral single quotes.
 - Fixed/improved code in ExtraData script. The fonts are now bold :-).
 
@@ -66,12 +76,12 @@ Fri Feb 21 23:01:04 UTC 2014  '<jetchisel@opensuse.org>'
 --------------------------------------------------------------------------------------------------------------------
 Wed Feb 19 04:29:58 UTC 2014 '<jetchisel@opensuse.org>'
 
-- Save the Value of uuid and VmName variable in a Function to avoid repeating it twice. 
+- Save the Value of uuid and VmName variable in a Function to avoid repeating it twice.
 
 --------------------------------------------------------------------------------------------------------------------
 Wed Feb 12 20:59:29 UTC 2014  '<jetchisel@opensuse.org>'
 
-- Added the help function. 
+- Added the help function.
   * A more verbose explanation about the usage.
 - Replaced ${0} with ${BASH_SOURCE}.
 
@@ -125,7 +135,7 @@ Wed Dec 25 10:00:14 UTC 2013 '<jetchisel@opensuse.org>'
 - VBoxAutostart@.service now starts after vboxdrv.service.
 - Since vboxdrv is present from vbox.org package and the distro this is not an issue.
 - The need to add vboxdrv in /etc/sysconfig/kernel is not required anymore.
-- User is still responsible for disabling any other autostart service/script that can cause conflict. 
+- User is still responsible for disabling any other autostart service/script that can cause conflict.
 
 ---------------------------------------------------------------------------------------------------------------------
 Fri Dec 20 13:12:24 UTC 2013 '<jetchisel@opensuse.org>'
@@ -134,18 +144,18 @@ Fri Dec 20 13:12:24 UTC 2013 '<jetchisel@opensuse.org>'
 - Removed VBoxManage showvminfo from systemd-vboxinit.
 - Only parsing VBoxManage list running/vms.
 - Parsing VBoxManage has been improved.
-- systemd-vboxinit can now handle vms names with white space! (Arrgg..!) 
+- systemd-vboxinit can now handle vms names with white space! (Arrgg..!)
 - ExtraData can also handle vms names with white space!
 
 ---------------------------------------------------------------------------------------------------------------------
 Mon Dec 10 2013 - '<jetchisel@opensuse.org>'
- 
+
 - Parsing VBoxManage for uuid has been made a bit more robust.
 - If in case your vms names has some silly character like { or }, you will not suffer! :-)
 
 ---------------------------------------------------------------------------------------------------------------------
 Sat Nov 23 2013 - '<jetchisel@opensuse.org>'
-  
+
 - Fix the permission issue of systemd-vboxinit
 - When you install this package without installing virtualbox first then permission is messed up.
 - The previous default group is vboxusers which is created by virtualbox and if it is not installed, meaning no
@@ -158,13 +168,13 @@ Wed Nov 6 2013 - '<jetchisel@opensuse.org>'
 - Moved systemd-vboxinit from /usr/bin to /usr/lib/systemd-vboxinit.d/ (which is created by systemd-vboxinit package)
 - /etc/init.d is for the legacy system V init scripts and LSB headers is a must!
 
----------------------------------------------------------------------------------------------------------------------  
+---------------------------------------------------------------------------------------------------------------------
 Tue Oct 29  2013 - '<jetchisel@opensuse.org>'
 
 - Added this changelog file
 - Rename VBoxUser@.service to VBoxAutostart@.service
 - Sorry for the rename but *Autostart seems to be more appropriate :-), If you were left with a broken symlink you
-- can fix it with: find /etc/systemd/ -name '*VBoxUser*' -exec echo rm {} + 
+- can fix it with: find /etc/systemd/ -name '*VBoxUser*' -exec echo rm {} +
 - remove the echo once your satisfied with the result.
 
 ---------------------------------------------------------------------------------------------------------------------
