@@ -4,8 +4,9 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
+#: Last Edit       : Wed Jan 28 19:59:49 PHT 2015 / Wed Jan 28 11:59:49 UTC 2015               #
 #: License         : GPLv3                                                                     #
-#: Version         : 2.0.1                                                                     #
+#: Version         : 2.0.3                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : --{about,stop,start,disable,license,help}                                 #
@@ -28,7 +29,7 @@ shopt -s extglob
 # ******************************************************************************************** #
 
 warn() {
-  printf '%s\n' "${BASH_SOURCE##*/}: $@" >&2
+  printf '%s\n' "${BASH_SOURCE##*/}: $*" >&2
 }
 
 die() {
@@ -72,7 +73,7 @@ fi
 Missing=()
 ExtComm=(cat find grep less pgrep pkill)
 MissingMessage="is either not installed or it is not in your PATH!"
-ExitMessage="Please install the following: $@"
+ExitMessage="Please install the following: "
 
 for apps in "${ExtComm[@]}"; do
   if ! type -P "$apps" >/dev/null; then
