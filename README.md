@@ -16,7 +16,7 @@ the vms you can set to auto via VBoxManage.
 LIST VMS.
 ```shell
 VBoxManage list vms
-``
+```
 
 SET THE "AUTO" FLAG TO THE VMS.
 ```shell
