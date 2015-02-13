@@ -165,8 +165,6 @@ Wait(){
 printf -v new "%s|" "@(${num[@]})"
 new=${new%|} 
 
-
-
 # ******************************************************************************************* #
 #                                                                                             #
 #       The Header with the Message in between the LongBar. Formatted with "printf -v".       #
