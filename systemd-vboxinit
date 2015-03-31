@@ -4,14 +4,14 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Wed Jan 28 19:59:49 PHT 2015 / Wed Jan 28 11:59:49 UTC 2015               #
+#: Last Edit       : Wed Apr  1 02:35:47 PHT 2015 / Tue Mar 31 18:35:47 UTC 2015               #
 #: License         : GPLv3                                                                     #
-#: Version         : 2.0.3                                                                     #
+#: Version         : 2.0.4                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : --{about,stop,start,disable,license,help}                                 #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
-#: ExtComm         : cat,find,grep,less,pgrep,pkill,VBoxManage                                 #
+#: ExtComm         : cat,find,grep,less,pgrep,VBoxManage                                       #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
@@ -60,7 +60,7 @@ NotInstalledMessage="VBoxManage is either not installed or it's not in your PATH
 
 if ! type -P VBoxManage >/dev/null; then
   if ! type -P vboxmanage >/dev/null; then
-    [[ -f /usr/lib/virtualbox/VBoxManage ]] || die "$NotInstalledMessage"
+    [[ -f /usr/lib/virtualbox/VBoxManage ]] || die "$NotInstalledMessage" 127
   fi
 fi
 
@@ -71,18 +71,18 @@ fi
 # ******************************************************************************************** #
 
 Missing=()
-ExtComm=(cat find grep less pgrep pkill)
+ExtComm=(cat find grep less pgrep)
 MissingMessage="is either not installed or it is not in your PATH!"
 ExitMessage="Please install the following: "
 
 for apps in "${ExtComm[@]}"; do
   if ! type -P "$apps" >/dev/null; then
-    echo "$apps $MissingMessage" >&2
+    printf '%s %s\n' "$apps" "$MissingMessage" >&2
     Missing+=("$apps")
   fi
 done
 
-(( ! ${#Missing[@]} )) || die "$ExitMessage[${Missing[*]}] exiting now!"
+(( ${#Missing[@]} )) && die "$ExitMessage[${Missing[*]}] exiting now!" 127
 
 # ******************************************************************************************** #
 #                                                                                              #
@@ -190,22 +190,20 @@ ExtractVmNameUuid() {
 # ******************************************************************************************** #
 
 VmStatus() {
+  local i j k
   if (( ${#RunningVms[@]} )); then
-    echo
     for i in "${!RunningVms[@]}"; do
       printf '%s\n' "Machine '${RunningVms[i]}' is already running..."
     done
   fi
 
   if (( ${#NoAutoRunning} )); then
-    echo
     for j in "${!NoAutoRunning[@]}"; do
       printf '%s\n' "Machine '${NoAutoRunning[j]}' is already running but not on auto..."
     done
   fi
 
   if (( ${#NoAutoVms[@]} )); then
-    echo
     for k in "${!NoAutoVms[@]}"; do
       printf '%s\n' "Machine '${NoAutoVms[k]}' is not set to auto..."
     done
@@ -219,6 +217,7 @@ VmStatus() {
 # ******************************************************************************************** #
 
 start() {
+  local line
   NoVmExit
   NoAutoVms=() RunningVms=() NoAutoRunning=()
 
@@ -246,6 +245,7 @@ start() {
 # ******************************************************************************************** #
 
 stop() {
+   local line
    (( ${#uuids[@]} )) || die "No virtual machine runnning!" 0
    while read -u8 -r line; do
      ExtractVmNameUuid
@@ -266,29 +266,39 @@ VBoxDaemons() {
 
 # ******************************************************************************************** #
 #                                                                                              #
+#                             Assign UpdateMessage in an array.                                #
+#                                                                                              #
+# ******************************************************************************************** #
+
+InstallMessage=(
+  "All VirtualBox process that is owned by use $LOGNAME has been stopped."
+  "You can now try to install VirtualBox (Update to the latest or install an old_version.)"
+)
+
+# ******************************************************************************************** #
+#                                                                                              #
 # Function to save-state of the runningvms and stop vbox daemons in preparation for an update. #
 #                                                                                              #
 # ******************************************************************************************** #
 
 disable() {
-  if (( ! ${#uuids[@]} )); then
-    echo "No virtual machine running!"
-  else
-    echo 'Saving the state of all running vms...'
-  fi
+  local f i daemon daemonpid
 
-  for l in "${!uuids[@]}"; do
-    VBoxManage controlvm "${uuids[l]}" savestate
-  done
+  if (( ! ${#uuids[@]} )); then
+    printf '%s\n' "No virtual machine running!"
+  else
+    printf '%s\n' 'Saving the state of all running vms...'
+    for i in "${!uuids[@]}"; do
+      VBoxManage controlvm "${uuids[i]}" savestate
+    done
+  fi
 
   while read -u9 -r daemon; do
     daemon=${daemon##*/}
-    if pgrep -u "$USER" -x -- "$daemon" >/dev/null; then
-       pkill -15 -- "$daemon"
-    fi
+    daemonpid=$(pgrep -u "$LOGNAME" -x -- "$daemon") && kill -15 "$daemonpid"
   done 9< <(VBoxDaemons)
 
-  echo "All VirtualBox process that is owned by $USER has been stopped."
+  printf '%s\n' "${UpdateMessage[@]}"
 }
 
 # ******************************************************************************************** #
@@ -327,22 +337,22 @@ about() {
 
 Copyright (C) 2013-2015 Jason V. Ferrer '<jetchisel@opensuse.org>'
 
-Auto start sessions when booting and save sessions when host is
+Auto start  sessions when  booting and save sessions  when host is
 stopped using systemd as its start up daemon.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
+This  program is  free software;  you can  redistribute  it and/or
+modify  it  under the  terms  of  the  GNU  General Public License
 version 3 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+This  program  is distributed  in the hope that it will be useful,
+but  WITHOUT ANY WARRANTY;  without even  the  implied warranty of
+MERCHANTABILITY or FITNESS FOR  A  PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-(see The LICENSE file) along with this program; if not, write
-to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-Floor, Boston, MA  02110-1301, USA.
+You should  have received a copy of the GNU General Public License
+(see The LICENSE file.) along  with this program; if not, write to
+the Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor
+Boston, MA  02110-1301, USA.
 
 EOF
 return
