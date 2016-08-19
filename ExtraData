@@ -4,7 +4,7 @@
 #: Title           : ExtraData                                                                #
 #: Sypnosis        : ExtraData                                                                #
 #: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013              #
-#: Last Edit       : Fri Aug 19 17:56:59 PHT 2016 / Fri Aug 19 09:56:59 UTC 2016               #
+#: Last Edit       : Fri Aug 19 18:12:01 PHT 2016 / Fri Aug 19 10:12:01 UTC 2016               #
 #: License         : GPLv3                                                                    #
 #: Version         : 1.0                                                                      #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                               #
@@ -293,7 +293,7 @@ Auto() {
   clear
   while true; do
     VmsTotalAuto
-     if  [[ ${REPLY} = "$new" ]]; then
+     if  [[ ${REPLY} = $new ]]; then
        VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
        printf -v single "[\"%s\"] " "${listvms[${REPLY}]}"
        printf '\n%s\n' "VirtualMachine $single is now on AUTO."
@@ -325,7 +325,7 @@ Manual() {
   clear
   while true; do
     VmsTotalManual
-      if  [[ ${REPLY} = "$new" ]]; then
+      if  [[ ${REPLY} = $new ]]; then
         VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
         printf -v single "[\"%s\"] " "${listvms[${REPLY}]}"
         printf '\n%s\n' "VirtualMachine $single is now on MANUAL."
@@ -358,7 +358,7 @@ Status() {
   clear
    while true; do
      VmsTotalStatus
-       if  [[ ${REPLY} = "$new" ]]; then
+       if  [[ ${REPLY} = $new ]]; then
          result=$(VBoxManage getextradata "${listvms[${REPLY}]}"  pvbx/startupMode)
          printf '\n%s\n' "VirtualMachine[\"${listvms[${REPLY}]}\"]=${result#*: }"
          paused
