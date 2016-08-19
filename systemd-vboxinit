@@ -4,7 +4,7 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Wed Apr  1 02:35:47 PHT 2015 / Tue Mar 31 18:35:47 UTC 2015               #
+#: Last Edit       : Fri Aug 19 15:51:19 PHT 2016 / Fri Aug 19 07:51:19 UTC 2016               #
 #: License         : GPLv3                                                                     #
 #: Version         : 2.0.4                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
@@ -166,7 +166,7 @@ while read -u6 -r vm; do
   running_uuid=${vm##*"{"}
   uuids+=("${running_uuid%"}"*}")
 done 6< <(ListRunningVms)
-
+##: This is not an error, printf -v save the array in the variable RunningUuids formatted!
 printf -v RunningUuids "%s|" "@(${uuids[@]})"
 RunningUuids=${RunningUuids%|}
 
@@ -223,12 +223,12 @@ start() {
 
   while read -u7 -r line; do
     ExtractVmNameUuid
-    if [[ $(ExtraData) = *auto* && $AllUuid != $RunningUuids ]]; then
+    if [[ $(ExtraData) = *auto* && $AllUuid != "$RunningUuids" ]]; then
       printf '\n%s\n' "Starting Machine '$VmName'..."
       StartVms
-    elif [[ $(ExtraData) != *auto* && $AllUuid = $RunningUuids ]]; then
+    elif [[ $(ExtraData) != *auto* && $AllUuid = "$RunningUuids" ]]; then
       NoAutoRunning+=("$VmName")
-    elif [[ $(ExtraData) = *auto* && $AllUuid = $RunningUuids ]]; then
+    elif [[ $(ExtraData) = *auto* && $AllUuid = "$RunningUuids" ]]; then
       RunningVms+=("$VmName")
     elif [[ $(ExtraData) != *auto* ]]; then
       NoAutoVms+=("$VmName")
@@ -282,7 +282,7 @@ InstallMessage=(
 # ******************************************************************************************** #
 
 disable() {
-  local f i daemon daemonpid
+  local i daemon daemonpid
 
   if (( ! ${#uuids[@]} )); then
     printf '%s\n' "No virtual machine running!"
@@ -298,7 +298,7 @@ disable() {
     daemonpid=$(pgrep -u "$LOGNAME" -x -- "$daemon") && kill -15 "$daemonpid"
   done 9< <(VBoxDaemons)
 
-  printf '%s\n' "${UpdateMessage[@]}"
+  printf '%s\n' "${InstallMessage[@]}"
 }
 
 # ******************************************************************************************** #
