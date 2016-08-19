@@ -1,9 +1,9 @@
 # Unit file for systemd-vboxinit.
-# https://github.com/Jetchisel/VBoxAutostart 
+# https://github.com/Jetchisel/VBoxAutostart
 
 [Unit]
 Description=VBox Virtual Machine Service for %I
-Requires=systemd-modules-load.service 
+Requires=systemd-modules-load.service
 After=vboxdrv.service systemd-modules-load.service
 Before=shutdown.target reboot.target halt.target
 Documentation=man:systemd-vboxinit(1) file:///usr/share/doc/packages/systemd-vboxinit/README

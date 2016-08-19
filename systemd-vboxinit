@@ -4,7 +4,7 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Fri Aug 19 15:51:19 PHT 2016 / Fri Aug 19 07:51:19 UTC 2016               #
+#: Last Edit       : Fri Aug 19 16:22:22 PHT 2016 / Fri Aug 19 08:22:22 UTC 2016               #
 #: License         : GPLv3                                                                     #
 #: Version         : 2.0.4                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
@@ -386,14 +386,6 @@ case $1 in
  --license|-l) license;;
             *) help >&2; exit 1;;
 esac
-
-# ******************************************************************************************** #
-#                                                                                              #
-#                                    Set the exit staus.                                       #
-#                                                                                              #
-# ******************************************************************************************** #
-
-exit 0
 
 # ============================================================================================ #
 #                                                                                              #

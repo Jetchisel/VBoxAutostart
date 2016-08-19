@@ -3,12 +3,12 @@
 # Only long-options.
 
 __systemd_vboxinit(){
-  local cur prev opts 
-  
+  local cur prev opts
+
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
   opts='--about --disable --help --license --start --stop'
-  
+
   if [[ ${cur} = * ]] ; then
      mapfile -t COMPREPLY < <(compgen -W "${opts}" -- ${cur})
      return 0

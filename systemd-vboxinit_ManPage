@@ -7,10 +7,10 @@ systemd-vboxinit - auto start/save of vbox vms during boot, shutdown and reboot 
 systemd-vboxinit [OPTIONS]
 
 .SH DESCRIPTION
-Systemd-vboxinit is a script that manage VirtualBox's vms to auto start and auto save. It can be a group 
+Systemd-vboxinit is a script that manage VirtualBox's vms to auto start and auto save. It can be a group
 of vms or a single unit. Using systemd it can autostart and autosave the vms upon reboot and shutdown of
-the host machine.  Derived from "vboxinit" which came from the phpvirtualbox project which is based on 
-vboxtool. It is used for the legacy system V ( init ) startup  daemon. This is the modified/rewritten 
+the host machine.  Derived from "vboxinit" which came from the phpvirtualbox project which is based on
+vboxtool. It is used for the legacy system V ( init ) startup  daemon. This is the modified/rewritten
 version for OpenSuSE with systemd as it's startup daemon. ( which should work for other distro's which is
 using systemd ).
 
@@ -25,12 +25,12 @@ using systemd ).
 .SH CONFIGURATION
 At creation time of the vms the extradata with the key pvbx/startupMode has no value ( Which is ignored ).
 One need's to enable it by adding the "auto" ( see USING VBOXMANAGE section. ) flag to the virtual machines
-in order for it  auto boot and auto save during startup and shutdown or reboot of the host. The virtual 
-machines are run in the background. ( which is what a daemon is all about :-) ). One can access the virtual 
+in order for it  auto boot and auto save during startup and shutdown or reboot of the host. The virtual
+machines are run in the background. ( which is what a daemon is all about :-) ). One can access the virtual
 machines ( depending on the network type/setup which is outside the scope of this manual, see VBoxManage or
 the virtualbox manual ) by using ssh(1) or with the gui tools such as Krdc for KDE and the equivalent for other
 DE's and of course phpvirtualbox itself which is very well documented, see http://sourceforge.net/p/phpvir\
-tualbox/wiki/Home/. A lot of existing tools can be used as well, one just need to do the proper networking 
+tualbox/wiki/Home/. A lot of existing tools can be used as well, one just need to do the proper networking
 setup.
 
 .SH USING VBOXMANAGE
@@ -50,25 +50,25 @@ Set the "manual" flag to the vms.
 .B  VBoxManage setextradata bar pvbx/startupMode manual
 
 .TP
-Where bar is the name of the virtual machine which you can get from VBoxManage list vms, see VBoxManage. 
+Where bar is the name of the virtual machine which you can get from VBoxManage list vms, see VBoxManage.
 
 .SH NOTE
 It is not recommended to run systemd-vboxinit with root's right such as running it with the all time favorite
-sudo utility. Once one have set the "auto" flag to the virtual machines one can test it. One should invoke it 
-as a normal user that belongs to the vboxusers group. 
+sudo utility. Once one have set the "auto" flag to the virtual machines one can test it. One should invoke it
+as a normal user that belongs to the vboxusers group.
 
 .B /usr/lib/systemd-vboxinit.d/systemd-vboxinit --start
 
 .B /usr/lib/systemd-vboxinit.d/systemd-vboxinit --stop
 
-One should see the virtual machines starting and saving state. If that succeeded one should restart and enable 
+One should see the virtual machines starting and saving state. If that succeeded one should restart and enable
 the daemon and reboot.
 
-.SH USING THE DAEMON 
+.SH USING THE DAEMON
 .TP
 Start the service.
 
-.B systemctl start VBoxAutostart@foo.service  
+.B systemctl start VBoxAutostart@foo.service
 
 .TP
 Enable the service. (start at boot time and stop during shutdown or reboot of the host machine.)
@@ -86,7 +86,7 @@ Restart the service
 .B  systemctl restart VBoxAutostart@foo.service
 
 Where foo is the username of the user who will use systemd-vboxinit. For multi-user one need's to start and
-enable the daemon with the specific username. One should consider the resources such as memory,cpu to be 
+enable the daemon with the specific username. One should consider the resources such as memory,cpu to be
 sufficient enough for both the host and the guest.
 
 .SH LOGGING
@@ -95,10 +95,10 @@ To check the logs for the service.
 Where foo is the username.
 
 .br
-For a persistent logging of journalctl e.g. you want to keep the logs on each reboot/shutdown see 
+For a persistent logging of journalctl e.g. you want to keep the logs on each reboot/shutdown see
 .B systemd-journald.service(8)
 
-.SH README 
+.SH README
 
 file:///usr/share/doc/packages/systemd-vboxinit/README
 
