@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2145
+# shellcheck disable=SC2053
 
 # ============================================================================================ #
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Fri Aug 19 18:12:01 PHT 2016 / Fri Aug 19 10:12:01 UTC 2016               #
+#: Last Edit       : Fri Dec 30 18:51:14 PHT 2016 / Fri Dec 30 10:51:14 UTC 2016               #
 #: License         : GPLv3                                                                     #
-#: Version         : 2.0.4                                                                     #
+#: Version         : 2.1.4                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : --{about,stop,start,disable,license,help}                                 #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
-#: ExtComm         : cat,find,grep,less,pgrep,VBoxManage                                       #
+#: ExtComm         : cat,find,grep,less,pgrep,systemd,VBoxManage                               #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
@@ -29,17 +31,22 @@ shopt -s extglob
 # ******************************************************************************************** #
 
 warn() {
-  printf '%s\n' "${BASH_SOURCE##*/}: $*" >&2
+  printf '%s\n' "${BASH_SOURCE##*/}: $*" ##: Print message to stdout by default.
 }
 
 die() {
-  local st=$?
-  case $2 in
-    *[^0-9]*|'') :;;
-    *) st=$2;;
+  local st=$? ##: Assign the last exit command to the var st.
+  case $2 in  ##: Test against a pattern for the value of `$2'
+    *[^0-9]*|'') :;; ##: If the value of `$2' is not a digit. `+([!0-9])' or empty.
+    *) st=$2;; ##: Save the value of `$2' in st if value is digit.
   esac
-  warn "$1"
-  exit "$st"
+
+  case $st in ##: Test against a pattern for the value of `$st'
+    0) warn "$1" ;;  ##: If value of `$st' is 0 then print message to stdout.
+    *) warn "$1" >&2;; ##: If value of `$st' is not zero then print message to `stderr'.
+  esac
+
+  exit "$st"  ##: Exit with the status of the recent command or an optional given status.
 }
 
 # ******************************************************************************************** #
@@ -71,7 +78,7 @@ fi
 # ******************************************************************************************** #
 
 Missing=()
-ExtComm=(cat find grep less pgrep)
+ExtComm=(cat find grep less pgrep systemd VBoxManage)
 MissingMessage="is either not installed or it is not in your PATH!"
 ExitMessage="Please install the following: "
 
@@ -108,12 +115,12 @@ VBoxDir=/usr/lib/virtualbox
 
 VBoxManage() {
   if [[ -f $VBoxDir/VBoxManage && -x $VBoxDir/VBoxManage ]]; then
-      "${VBoxDir}"/VBoxManage "$@"
+    "${VBoxDir}"/VBoxManage "$@"
   else
     if type -P VBoxManage >/dev/null; then
-       command -p VBoxManage "$@"
+      command -p VBoxManage "$@"
     else
-       command -p vboxmanage "$@"
+      command -p vboxmanage "$@"
     fi
   fi
 }
@@ -152,7 +159,7 @@ SaveVms() {
 
 NoVmExit() {
   mapfile -u5 -t AllVms 5< <(ListVms)
-  (( ${#AllVms[@]} )) || die "No virtual machine found!" 0
+  (( ${#AllVms[@]} )) || die "No virtual machine found!"
 }
 
 # ******************************************************************************************** #
@@ -240,22 +247,6 @@ start() {
 
 # ******************************************************************************************** #
 #                                                                                              #
-#               Function to save vms state instead of shutting down completely.                #
-#                                                                                              #
-# ******************************************************************************************** #
-
-stop() {
-   local line
-   (( ${#uuids[@]} )) || die "No virtual machine runnning!" 0
-   while read -u8 -r line; do
-     ExtractVmNameUuid
-     printf '%s\n' "Saving machine '$VmName' state..."
-     SaveVms
-   done 8< <(ListRunningVms)
-}
-
-# ******************************************************************************************** #
-#                                                                                              #
 #  Function to print/list files/executables (without extension) inside /usr/lib/virtualbox.    #
 #                                                                                              #
 # ******************************************************************************************** #
@@ -266,13 +257,54 @@ VBoxDaemons() {
 
 # ******************************************************************************************** #
 #                                                                                              #
+#                      Function to stop/kill all running vbox processes.                       #
+#                                                                                              #
+# ******************************************************************************************** #
+
+KillAllVBoxProcess() {
+  local pid pids
+  while read -u9 -r daemon; do
+    daemon=${daemon##*/}
+    daemonpid=$(pgrep -u "$LOGNAME" -x -- "$daemon")
+    (( daemonpid )) && pids+=("$daemonpid")
+  done 9< <(VBoxDaemons)
+
+  for pid in "${pids[@]}"; do
+    kill -15 "$pid"
+  done
+}
+
+# ******************************************************************************************** #
+#                                                                                              #
+#               Function to save vms state instead of shutting down completely.                #
+#                                                                                              #
+# ******************************************************************************************** #
+
+stop() {
+  local line
+  (( ${#uuids[@]} )) || die "No virtual machine runnning!"
+  while read -u8 -r line; do
+    ExtractVmNameUuid
+    printf '%s\n' "Saving machine '$VmName' state..."
+    SaveVms
+  done 8< <(ListRunningVms)
+
+  if ! systemctl is-active vboxdrv.service >/dev/null; then
+    KillAllVBoxProcess
+  fi
+}
+
+# ******************************************************************************************** #
+#                                                                                              #
 #                             Assign UpdateMessage in an array.                                #
 #                                                                                              #
 # ******************************************************************************************** #
 
 InstallMessage=(
-  "All VirtualBox process that is owned by use $LOGNAME has been stopped."
-  "You can now try to install VirtualBox (Update to the latest or install an old_version.)"
+"All VirtualBox process that is owned by $LOGNAME has been stopped."
+"You can now do the following: "
+"   Install/reinstall VirtualBox (Update to the latest or install an old_version.)"
+"   Rebuild the VirtualBox kernel modules."
 )
 
 # ******************************************************************************************** #
@@ -282,23 +314,15 @@ InstallMessage=(
 # ******************************************************************************************** #
 
 disable() {
-  local i daemon daemonpid
+  local line daemon daemonpid
+  (( ${#uuids[@]} )) || die "No virtual machine runnning!"
+  while read -u8 -r line; do
+    ExtractVmNameUuid
+    printf '%s\n' "Saving machine '$VmName' state..."
+    SaveVms
+  done 8< <(ListRunningVms)
 
-  if (( ! ${#uuids[@]} )); then
-    printf '%s\n' "No virtual machine running!"
-  else
-    printf '%s\n' 'Saving the state of all running vms...'
-    for i in "${!uuids[@]}"; do
-      VBoxManage controlvm "${uuids[i]}" savestate
-    done
-  fi
-
-  while read -u9 -r daemon; do
-    daemon=${daemon##*/}
-    daemonpid=$(pgrep -u "$LOGNAME" -x -- "$daemon") && kill -15 "$daemonpid"
-  done 9< <(VBoxDaemons)
-
-  printf '%s\n' "${InstallMessage[@]}"
+  KillAllVBoxProcess && printf '\n%s\n' "${InstallMessage[@]}"
 }
 
 # ******************************************************************************************** #
@@ -308,11 +332,11 @@ disable() {
 # ******************************************************************************************** #
 
 help() {
-   cat <<EOF
+  cat <<EOF
 
-Usage: ${BASH_SOURCE##*/} OPTION
+  Usage: ${BASH_SOURCE##*/} OPTION
 
-Options:
+  Options:
   -s, --start    Start enabled virtual machines otherwise show the state.
   -x, --stop     Save the state of all running virtual machines enabled or not.
   -d, --disable  Like stop but also stops the vbox daemons, useful before a vbox update.
@@ -331,28 +355,28 @@ return
 # ******************************************************************************************** #
 
 about() {
-    cat <<EOF
+  cat <<EOF
 
-                     Systemd-vboxinit
+                         Systemd-vboxinit
 
-Copyright (C) 2013-2015 Jason V. Ferrer '<jetchisel@opensuse.org>'
+  Copyright (C) 2013-2016 Jason V. Ferrer '<jetchisel@opensuse.org>'
 
-Auto start  sessions when  booting and save sessions  when host is
-stopped using systemd as its start up daemon.
+  Auto start  sessions when  booting and save sessions  when host is
+  stopped using systemd as its start up daemon.
 
-This  program is  free software;  you can  redistribute  it and/or
-modify  it  under the  terms  of  the  GNU  General Public License
-version 3 as published by the Free Software Foundation.
+  This  program is  free software;  you can  redistribute  it and/or
+  modify  it  under the  terms  of  the  GNU  General Public License
+  version 3 as published by the Free Software Foundation.
 
-This  program  is distributed  in the hope that it will be useful,
-but  WITHOUT ANY WARRANTY;  without even  the  implied warranty of
-MERCHANTABILITY or FITNESS FOR  A  PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
+  This  program  is distributed  in the hope that it will be useful,
+  but  WITHOUT ANY WARRANTY;  without even  the  implied warranty of
+  MERCHANTABILITY or FITNESS FOR  A  PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
 
-You should  have received a copy of the GNU General Public License
-(see The LICENSE file.) along  with this program; if not, write to
-the Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor
-Boston, MA  02110-1301, USA.
+  You should  have received a copy of the GNU General Public License
+  (see The LICENSE file.) along  with this program; if not, write to
+  the Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor
+  Boston, MA  02110-1301, USA.
 
 EOF
 return
@@ -378,13 +402,20 @@ license() {
 # ******************************************************************************************** #
 
 case $1 in
-   --about|-a) about;;
- --disable|-d) disable;;
-    --help|-h) help; exit 0;;
-   --start|-s) start;;
-    --stop|-x) stop;;
- --license|-l) license;;
-            *) help >&2; exit 1;;
+  --about|-a) about
+    ;;
+  --disable|-d) disable
+    ;;
+  --help|-h) help; exit 0
+    ;;
+  --start|-s) start
+    ;;
+  --stop|-x) stop
+    ;;
+  --license|-l) license
+    ;;
+  *) help >&2; exit 1
+    ;;
 esac
 
 # ============================================================================================ #

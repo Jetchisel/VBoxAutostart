@@ -5,15 +5,19 @@
 Description=VBox Virtual Machine Service for %I
 Requires=systemd-modules-load.service
 After=vboxdrv.service systemd-modules-load.service
-Before=shutdown.target reboot.target halt.target
+Before=runlevel2.target runlevel3.target runlevel4.target runlevel5.target shutdown.target
+Conflicts=shutdown.target
 Documentation=man:systemd-vboxinit(1) file:///usr/share/doc/packages/systemd-vboxinit/README
 
 [Service]
 User=%I
-Type=oneshot
-KillMode=none
+Type=forking
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
 Group=vboxusers
-RemainAfterExit=true
+RemainAfterExit=yes
 StandardOutput=syslog+console
 ExecStart=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit --start
 ExecStop=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit --stop
