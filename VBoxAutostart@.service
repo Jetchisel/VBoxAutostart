@@ -1,22 +1,27 @@
-# Unit file for systemd-vboxinit.
-# https://github.com/Jetchisel/VBoxAutostart
+# ==================================================================================== #
+# Unit file for systemd-vboxinit.                                                      #
+# https://github.com/Jetchisel/VBoxAutostart                                           #
+# Created:   Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
+# Last Edit: Thu 16 Jan 2020 10:40:43 AM PST  /  Thu Jan 16 02:40:43 UTC 2020          #
+# ==================================================================================== #
 
 [Unit]
 Description=VBox Virtual Machine Service for %I
 Requires=systemd-modules-load.service
-After=vboxdrv.service systemd-modules-load.service
-Before=runlevel2.target runlevel3.target runlevel4.target runlevel5.target shutdown.target
-Conflicts=shutdown.target
+After=network.target vboxdrv.service systemd-modules-load.service
+Before=shutdown.target halt.target runlevel2.target
+DefaultDependencies=no
 Documentation=man:systemd-vboxinit(1) file:///usr/share/doc/packages/systemd-vboxinit/README
 
 [Service]
 User=%I
+Restart=no
 Type=forking
-TimeoutSec=5min
-IgnoreSIGPIPE=no
-KillMode=process
+KillMode=none
 GuessMainPID=no
 Group=vboxusers
+TimeoutStopSec=40
+IgnoreSIGPIPE=false
 RemainAfterExit=yes
 StandardOutput=syslog+console
 ExecStart=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit --start

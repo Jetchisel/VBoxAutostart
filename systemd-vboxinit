@@ -6,28 +6,24 @@
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
 #: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Fri Dec 30 19:47:26 PHT 2016 / Fri Dec 30 11:47:26 UTC 2016               #
+#: Last Edit       : Thu Jan 16 10:49:02 PST 2020 / Thu Jan 16 02:49:02 UTC 2020               #
 #: License         : GPLv3                                                                     #
-#: Version         : 2.1.4                                                                     #
+#: Version         : 2.1.6                                                                     #
 #: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
-#: Options         : --{about,stop,start,disable,license,help}                                 #
+#: Options         : [about,stop,start,disable,license,help]                                   #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
 #: ExtComm         : cat,find,grep,less,pgrep,systemd,VBoxManage                               #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
-#                                                                                              #
 #              Set shell option so RunningUuids can be tested in one-line.                     #
-#                                                                                              #
 # ******************************************************************************************** #
 
 shopt -s extglob
 
 # ******************************************************************************************** #
-#                                                                                              #
 #   Warn and die functions, for exit messages and default status or an optional exit status.   #
-#                                                                                              #
 # ******************************************************************************************** #
 
 warn() {
@@ -50,17 +46,13 @@ die() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #       One argument only exit immediately and avoid running the script until the end.         #
-#                                                                                              #
 # ******************************************************************************************** #
 
 (( $# > 1 )) && die "Too many arguments, try --help" 1
 
 # ******************************************************************************************** #
-#                                                                                              #
 #              Check if VirtualBox is installed if not exit with an error.                     #
-#                                                                                              #
 # ******************************************************************************************** #
 
 NotInstalledMessage="VBoxManage is either not installed or it's not in your PATH!"
@@ -72,9 +64,7 @@ if ! type -P VBoxManage >/dev/null; then
 fi
 
 # ******************************************************************************************** #
-#                                                                                              #
 #        Check for the required app/executable is with in your PATH, exit otherwise.           #
-#                                                                                              #
 # ******************************************************************************************** #
 
 Missing=()
@@ -92,25 +82,19 @@ done
 (( ${#Missing[@]} )) && die "$ExitMessage[${Missing[*]}] exiting now!" 127
 
 # ******************************************************************************************** #
-#                                                                                              #
 #           Check if vboxdrv kernel module is loaded if not exit with an error.                #
-#                                                                                              #
 # ******************************************************************************************** #
 
 grep -q "^vboxdrv" /proc/modules || die "vboxdrv is not loaded!"
 
 # ******************************************************************************************** #
-#                                                                                              #
 #          Assign VirtualBox directory /usr/lib/virtualbox to the variable VBoxDir.            #
-#                                                                                              #
 # ******************************************************************************************** #
 
 VBoxDir=/usr/lib/virtualbox
 
 # ******************************************************************************************** #
-#                                                                                              #
 #  Use the VBoxManage in /usr/lib/virtualbox if it exist, else use whatever is in your PATH.   #
-#                                                                                              #
 # ******************************************************************************************** #
 
 VBoxManage() {
@@ -126,9 +110,7 @@ VBoxManage() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                                  VBoxManage Functions.                                       #
-#                                                                                              #
 # ******************************************************************************************** #
 
 ExtraData() {
@@ -152,9 +134,7 @@ SaveVms() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #           Function to check for vms. If there is none found exit without an error.           #
-#                                                                                              #
 # ******************************************************************************************** #
 
 NoVmExit() {
@@ -163,9 +143,7 @@ NoVmExit() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #  Put the running/sanitized vms uuids in an array and format it in the variable RunningUuids. #
-#                                                                                              #
 # ******************************************************************************************** #
 
 uuids=()
@@ -178,9 +156,7 @@ printf -v RunningUuids "%s|" "@(${uuids[@]})"
 RunningUuids=${RunningUuids%|}
 
 # ******************************************************************************************** #
-#                                                                                              #
 #  Function to sanitize/extract the vmname and uuid using P.E. inside the start,stop function. #
-#                                                                                              #
 # ******************************************************************************************** #
 
 ExtractVmNameUuid() {
@@ -191,9 +167,7 @@ ExtractVmNameUuid() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #          Function to print the vms status when started, e.g. running,auto,noauto.            #
-#                                                                                              #
 # ******************************************************************************************** #
 
 VmStatus() {
@@ -218,15 +192,16 @@ VmStatus() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                             Function to start the vms Headless.                              #
-#                                                                                              #
 # ******************************************************************************************** #
 
 start() {
   local line
   NoVmExit
-  NoAutoVms=() RunningVms=() NoAutoRunning=()
+  #NoAutoVms=() RunningVms=() NoAutoRunning=()
+  declare -a NoAutoVms
+  declare -a RunningVms
+  declare -a NoAutoRunning
 
   while read -u7 -r line; do
     ExtractVmNameUuid
@@ -246,9 +221,7 @@ start() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #  Function to print/list files/executables (without extension) inside /usr/lib/virtualbox.    #
-#                                                                                              #
 # ******************************************************************************************** #
 
 VBoxDaemons() {
@@ -256,13 +229,13 @@ VBoxDaemons() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                      Function to stop/kill all running vbox processes.                       #
-#                                                                                              #
 # ******************************************************************************************** #
 
 KillAllVBoxProcess() {
-  local pid pids
+  local pid
+  local pids
+  local daemon
   while read -u9 -r daemon; do
     daemon=${daemon##*/}
     daemonpid=$(pgrep -u "$LOGNAME" -x -- "$daemon")
@@ -275,9 +248,7 @@ KillAllVBoxProcess() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #               Function to save vms state instead of shutting down completely.                #
-#                                                                                              #
 # ******************************************************************************************** #
 
 stop() {
@@ -295,9 +266,7 @@ stop() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                             Assign UpdateMessage in an array.                                #
-#                                                                                              #
 # ******************************************************************************************** #
 
 InstallMessage=(
@@ -308,13 +277,15 @@ InstallMessage=(
 )
 
 # ******************************************************************************************** #
-#                                                                                              #
 # Function to save-state of the runningvms and stop vbox daemons in preparation for an update. #
-#                                                                                              #
 # ******************************************************************************************** #
 
 disable() {
-  local line daemon daemonpid
+  local line
+  local daemon
+  local daemonpid
+  local line
+
   (( ${#uuids[@]} )) || die "No virtual machine runnning!"
   while read -u8 -r line; do
     ExtractVmNameUuid
@@ -326,9 +297,7 @@ disable() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                                       Usage Function.                                        #
-#                                                                                              #
 # ******************************************************************************************** #
 
 help() {
@@ -349,9 +318,7 @@ return
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                                      About function.                                         #
-#                                                                                              #
 # ******************************************************************************************** #
 
 about() {
@@ -359,7 +326,7 @@ about() {
 
                          Systemd-vboxinit
 
-  Copyright (C) 2013-2016 Jason V. Ferrer '<jetchisel@opensuse.org>'
+  Copyright (C) 2013-2020 Jason V. Ferrer '<jetchisel@opensuse.org>'
 
   Auto start  sessions when  booting and save sessions  when host is
   stopped using systemd as its start up daemon.
@@ -383,9 +350,7 @@ return
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                  License function.  (required by GPL, see the LICENSE file)                  #
-#                                                                                              #
 # ******************************************************************************************** #
 
 license() {
@@ -396,9 +361,7 @@ license() {
 }
 
 # ******************************************************************************************** #
-#                                                                                              #
 #                             Check for a command line option.                                 #
-#                                                                                              #
 # ******************************************************************************************** #
 
 case $1 in
@@ -419,7 +382,5 @@ case $1 in
 esac
 
 # ============================================================================================ #
-#                                                                                              #
 #                                   >>> END OF SCRIPT <<<                                      #
-#                                                                                              #
 # ============================================================================================ #
