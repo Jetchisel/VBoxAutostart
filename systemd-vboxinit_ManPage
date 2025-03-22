@@ -1,36 +1,36 @@
 .\" Manpage for systemd-vboxinit
 .\" Contact jetchisel@opensuse.org to correct errors or typos.
-.TH SYSTEMD-VBOXINIT 1 "27 Oct 2013" "1.0" "systemd-vboxinit man page"
+.TH SYSTEMD-VBOXINIT 1 "2025 Apr 22" "1.0" "systemd-vboxinit man page"
 .SH "NAME"
-systemd-vboxinit - auto start/save of vbox vms during boot, shutdown and reboot of the host.
+\fBsystemd-vboxinit\fR - auto start/save of vbox vms during boot, shutdown and reboot of the host.
 .SH SYNOPSIS
-systemd-vboxinit [OPTIONS]
+\fBsystemd-vboxinit\fR [OPTIONS]
 
 .SH DESCRIPTION
-Systemd-vboxinit is a script that manage VirtualBox's vms to auto start and auto save. It can be a group
-of vms or a single unit. Using systemd it can autostart and autosave the vms upon reboot and shutdown of
-the host machine.  Derived from "vboxinit" which came from the phpvirtualbox project which is based on
-vboxtool. It is used for the legacy system V ( init ) startup  daemon. This is the modified/rewritten
-version for OpenSuSE with systemd as it's startup daemon. ( which should work for other distro's which is
-using systemd ).
+\fBSystemd-vboxinit\fR is a script that manage \fBVirtualBox\fR's vms to auto start and auto save. It can be a group of
+vms or a single unit. Using \fBsystemd\fR it can autostart and autosave the vms upon reboot and shutdown of
+the host machine.  Derived from \fBvboxinit\fR which came from the phpvirtualbox project which is based on
+\fBvboxtool\fR. It is used for the legacy \fBsystem V\fR (init) startup  daemon. This is the modified/rewritten
+version for \fBOpenSuSE\fR with \fBsystemd\fR as it's startup daemon. ( which should work for other distro's
+which is using \fBsystemd\fR ).
 
 .SH OPTIONS
-  -s, --start    Start enabled virtual machines otherwise show the state.
-  -x, --stop     Save the state of all running virtual machines enabled or not.
-  -d, --disable  Like stop but also stops the vbox daemons, useful before a vbox update.
-  -h, --help     Show this help.
-  -a, --about    A brief info.
-  -l, --license  Show license.
+  \fB-s\fR, \fB--start\fR    Start enabled virtual machines otherwise show the state.
+  \fB-x\fR, \fB--stop\fR     Save the state of all running virtual machines enabled or not.
+  \fB-d\fR, \fB--disable\fR  Like stop but also stops the vbox daemons, useful before a vbox update.
+  \fB-h\fR, \fB--help\fR     Show this help.
+  \fB-a\fR, \fB--about\fR    A brief info.
+  \fB-l\fR, \fB--license\fR  Show license.
 
 .SH CONFIGURATION
-At creation time of the vms the extradata with the key pvbx/startupMode has no value ( Which is ignored ).
-One need's to enable it by adding the "auto" ( see USING VBOXMANAGE section. ) flag to the virtual machines
+At creation time of the vms the \fBextradata\fR with the key \fBpvbx/startupMode\fR has no value ( Which is ignored ).
+One need's to enable it by adding the \fBauto\fR ( see \fBUSING VBOXMANAGE\fR section. ) flag to the virtual machines
 in order for it  auto boot and auto save during startup and shutdown or reboot of the host. The virtual
 machines are run in the background. ( which is what a daemon is all about :-) ). One can access the virtual
-machines ( depending on the network type/setup which is outside the scope of this manual, see VBoxManage or
-the virtualbox manual ) by using ssh(1) or with the gui tools such as Krdc for KDE and the equivalent for other
-DE's and of course phpvirtualbox itself which is very well documented, see http://sourceforge.net/p/phpvir\
-tualbox/wiki/Home/. A lot of existing tools can be used as well, one just need to do the proper networking
+machines ( depending on the network type/setup which is outside the scope of this manual, see \fBVBoxManage\fR or
+the virtualbox manual ) by using \fBssh(1)\fR or with the gui tools such as \fBKrdc\fR for \fBKDE\fR and the equivalent for other
+DE's and of course \fBphpvirtualbox\fR itself which is very well documented, see \fBhttps://github.com/phpvirtualbox/phpvirtualbox/wiki\fR
+A lot of existing tools can be used as well, one just need to do the proper networking
 setup.
 
 .SH USING VBOXMANAGE
@@ -40,22 +40,22 @@ List the vms.
 .B  VBoxManage list vms
 .br
 .TP
-Set the "auto" flag to the vms.
+Set the \fBauto\fR flag to the vms.
 
 .B  VBoxManage setextradata bar pvbx/startupMode auto
 .br
 .TP
-Set the "manual" flag to the vms.
+Set the \fBmanual\fR flag to the vms.
 
 .B  VBoxManage setextradata bar pvbx/startupMode manual
 
 .TP
-Where bar is the name of the virtual machine which you can get from VBoxManage list vms, see VBoxManage.
+Where \fBbar\fR is the name of the virtual machine which you can get from \fBVBoxManage list vms\fR, see \fBVBoxManage\fR.
 
 .SH NOTE
-It is not recommended to run systemd-vboxinit with root's right such as running it with the all time favorite
-sudo utility. Once one have set the "auto" flag to the virtual machines one can test it. One should invoke it
-as a normal user that belongs to the vboxusers group.
+It is not recommended to run \fBsystemd-vboxinit\fR with root's right such as running it with the all time favorite
+sudo utility. Once one have set the \fBauto\fR flag to the virtual machines one can test it. One should invoke it
+as a normal user that belongs to the \fBvboxusers\fR group.
 
 .B /usr/lib/systemd-vboxinit.d/systemd-vboxinit --start
 
@@ -85,22 +85,22 @@ Restart the service
 
 .B  systemctl restart VBoxAutostart@foo.service
 
-Where foo is the username of the user who will use systemd-vboxinit. For multi-user one need's to start and
+Where \fBfoo\fR is the username of the user who will use \fBsystemd-vboxinit\fR. For multi-user one need's to start and
 enable the daemon with the specific username. One should consider the resources such as memory,cpu to be
 sufficient enough for both the host and the guest.
 
 .SH LOGGING
 To check the logs for the service.
 .B  journalctl _SYSTEMD_UNIT=VBoxAutostart@foo.service
-Where foo is the username.
+Where \fBfoo\fR is the username.
 
 .br
-For a persistent logging of journalctl e.g. you want to keep the logs on each reboot/shutdown see
+For a persistent logging of \fBjournalctl\fR e.g. you want to keep the logs on each reboot/shutdown see
 .B systemd-journald.service(8)
 
 .SH README
 
-file:///usr/share/doc/packages/systemd-vboxinit/README
+\fBfile:///usr/share/doc/packages/systemd-vboxinit/README\fR
 
 .SH SEE ALSO
 
@@ -108,5 +108,5 @@ file:///usr/share/doc/packages/systemd-vboxinit/README
 
 .SH AUTHOR
 
-Jason V. Ferrer (jetchisel@opensuse.org)
+\fBJason V. Ferrer (jetchisel@gmail.com)\fR
 

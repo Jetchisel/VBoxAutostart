@@ -3,15 +3,16 @@
 # ============================================================================================ #
 #: Title           : ExtraData                                                                 #
 #: Sypnosis        : ExtraData                                                                 #
-#: Date Created    : Thu Oct 17 17:47:24 PHT 2013 / Thu Oct 17 09:48:11 UTC 2013               #
-#: Last Edit       : Thu Jan 16 10:49:02 PST 2020 / Thu Jan 16 02:49:02 UTC 2020               #
+#: Date Created    : Thu Oct 17 17:47:24 2013 +0800  /  Thu Oct 17 09:48:11 2013 UTC           #
+#: Last Edit       : Sat Mar 22 18:13:24 2025 +0800  /  Sat Mar 22 10:13:24 2025 UTC           #
 #: License         : GPLv3                                                                     #
-#: Version         : 1.0                                                                       #
-#: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
+#: Version         : 1.0.1                                                                     #
+#: Author          : Jason V. Ferrer '<jetchisel@gmail.com>'                                   #
 #: Description     : Set extradata to auto or manual of VirtualBox's vms.                      #
 #: Options         : NONE                                                                      #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
 #: ExtComm         : clear,sleep,tput,VBoxManage                                               #
+#: Copyright       : Jason V. Ferrer 2013-2025                                                 #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
@@ -104,12 +105,13 @@ StatusAll() {
 
 paused() {
   while :; do
-    printf "\n%s\n"
+    printf "\n\n"
     printf -v prompt "Press [c] to continue. "
     read -r -e -p "$prompt" -n1
     case $REPLY in
       [Cc]) clear
             return 0
+# shellcheck disable=SC2317
             clear;;
          *) printf "%s\n" "Invalid answer!" >&2
     esac
@@ -121,7 +123,8 @@ paused() {
 # ******************************************************************************************** #
 
 InValid() {
-  printf "\n%s" "Invalid option!" >&2
+  # printf "\n%s" "Invalid option!" >&2
+  printf "\nInvalid option!" >&2
 }
 
 # ******************************************************************************************** #
@@ -136,7 +139,7 @@ Wait(){
 # ******************************************************************************************** #
 #              Format the numbers in the array so it can be tested  in one line.               #
 # ******************************************************************************************** #
-
+# shellcheck disable=SC2145
 printf -v new "%s|" "@(${num[@]})"
 new=${new%|}
 
@@ -255,6 +258,7 @@ Auto() {
   clear
   while true; do
     VmsTotalAuto
+    # shellcheck disable=SC2053
      if  [[ ${REPLY} = $new ]]; then
        VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode auto
        printf -v single "[\"%s\"] " "${listvms[${REPLY}]}"
@@ -285,6 +289,7 @@ Manual() {
   clear
   while true; do
     VmsTotalManual
+      # shellcheck disable=SC2053
       if  [[ ${REPLY} = $new ]]; then
         VBoxManage setextradata "${listvms[${REPLY}]}"  pvbx/startupMode manual
         printf -v single "[\"%s\"] " "${listvms[${REPLY}]}"
@@ -297,6 +302,7 @@ Manual() {
         paused
       elif [[ ${REPLY} = [Rr] ]]; then
         return 0
+       # shellcheck disable=SC2317
         clear
       elif [[ ${REPLY} = [Qq] ]]; then
         clear
@@ -316,6 +322,7 @@ Status() {
   clear
    while true; do
      VmsTotalStatus
+       # shellcheck disable=SC2053
        if  [[ ${REPLY} = $new ]]; then
          result=$(VBoxManage getextradata "${listvms[${REPLY}]}"  pvbx/startupMode)
          printf '\n%s\n' "VirtualMachine[\"${listvms[${REPLY}]}\"]=${result#*: }"
@@ -326,6 +333,7 @@ Status() {
          paused
        elif [[ ${REPLY} = [Rr] ]]; then
          return 0
+      # shellcheck disable=SC2317
          clear
        elif [[ ${REPLY} = [Qq] ]]; then
          clear

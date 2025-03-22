@@ -1,9 +1,9 @@
-# ==================================================================================== #
-# Unit file for systemd-vboxinit.                                                      #
-# https://github.com/Jetchisel/VBoxAutostart                                           #
-# Created:   Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-# Last Edit: Thu 16 Jan 2020 10:40:43 AM PST  /  Thu Jan 16 02:40:43 UTC 2020          #
-# ==================================================================================== #
+# ============================================================================================ #
+#: Description     : Unit file for systemd-vboxinit.                                           #
+#: Url             : https://github.com/Jetchisel/VBoxAutostart                                #
+#: Date Created    : Wed Oct 02 07:57:25 2013 +0800  /  Wed Oct 02 03:11:58 2013 UTC           #
+#: Last Edit       : Sat Mar 22 13:50:00 2025 +0800  /  Sat Mar 22 05:50:00 2025 UTC           #
+# ============================================================================================ #
 
 [Unit]
 Description=VBox Virtual Machine Service for %I
@@ -23,7 +23,7 @@ Group=vboxusers
 TimeoutStopSec=40
 IgnoreSIGPIPE=false
 RemainAfterExit=yes
-StandardOutput=syslog+console
+StandardOutput=journal+console
 ExecStart=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit --start
 ExecStop=-/usr/lib/systemd-vboxinit.d/systemd-vboxinit --stop
 

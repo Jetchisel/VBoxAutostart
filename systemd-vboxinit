@@ -5,15 +5,16 @@
 # ============================================================================================ #
 #: Title           : systemd-vboxinit                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                  #
-#: Date Created    : Wed Oct  2 07:57:25 PHT 2013 / Wed Oct  2 03:11:58 UTC 2013               #
-#: Last Edit       : Mon 04 Oct 2021 09:29:12 AM PST  /  Mon 04 Oct 2021 01:29:12 AM UTC       #
+#: Date Created    : Wed Oct 02 07:57:25 2013 +0800  /  Wed Oct 02 03:11:58 2013 UTC           #
+#: Last Edit       : Sat Mar 22 13:49:07 2025 +0800  /  Sat Mar 22 05:49:07 2025 UTC           #
 #: License         : GPLv3                                                                     #
-#: Version         : 2.1.7                                                                     #
-#: Author          : Jason V. Ferrer '<jetchisel@opensuse.org>'                                #
+#: Version         : 2.1.8                                                                     #
+#: Author          : Jason V. Ferrer '<jetchisel@gmail.com>'                                   #
 #: Description     : Auto start sessions when booting and save sessions when host is stopped.  #
 #: Options         : [about,stop,start,disable,license,help]                                   #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
 #: ExtComm         : cat,find,grep,less,pgrep,systemctl,VBoxManage                             #
+#: Copyright       : Jason V. Ferrer 2013-2025                                                 #
 # ============================================================================================ #
 
 # ******************************************************************************************** #
@@ -79,7 +80,7 @@ for apps in "${ExtComm[@]}"; do
   fi
 done
 
-(( ${#Missing[@]} )) && die "$ExitMessage[${Missing[*]}] exiting now!" 127
+(( ${#Missing[@]} )) && die "${ExitMessage}[${Missing[*]}] exiting now!" 127
 
 # ******************************************************************************************** #
 #           Check if vboxdrv kernel module is loaded if not exit with an error.                #
@@ -286,14 +287,18 @@ disable() {
   local daemonpid
   local line
 
-  (( ${#uuids[@]} )) || die "No virtual machine runnning!"
-  while read -u8 -r line; do
-    ExtractVmNameUuid
-    printf '%s\n' "Saving machine '$VmName' state..."
-    SaveVms
-  done 8< <(ListRunningVms)
-
-  KillAllVBoxProcess && printf '\n%s\n' "${InstallMessage[@]}"
+  if (( ${#uuids[*]} )); then
+    while read -u8 -r line; do
+      ExtractVmNameUuid
+      printf '%s\n' "Saving machine '$VmName' state..."
+      SaveVms
+    done 8< <(ListRunningVms)
+  else
+    printf 'No virtual machine running!\n\n' >&2
+  fi
+  printf 'Trying to stop all VBox daemons!\n' &&
+  KillAllVBoxProcess &&
+  printf '\n%s\n' "${InstallMessage[@]}"
 }
 
 # ******************************************************************************************** #
