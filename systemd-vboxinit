@@ -3,9 +3,9 @@
 #: Title           : systemd-vboxinit                                                                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                                                                  #
 #: Date Created    : Wed Oct 02 07:57:25 2013 +0800  /  Wed Oct 02 03:11:58 2013 UTC                                                           #
-#: Last Edit       : Mon Apr 14 13:46:31 2025 +0800  /  Mon Apr 14 05:46:31 2025 UTC                                                           #
+#: Last Edit       : Tue Apr 15 08:50:59 2025 +0800  /  Tue Apr 15 00:50:59 2025 UTC                                                           #
 #: License         : GPLv3                                                                                                                     #
-#: Version         : 2.2.0                                                                                                                     #
+#: Version         : 2.2.1                                                                                                                     #
 #: Author          : Jason V. Ferrer '<jason.ferrer@gmail.com>'                                                                                #
 #: Description     : Enable automatic startup of virtual machine sessions during system boot and save their state upon host shutdown or halt.  #
 #: Options         : --about|-a, --stop|-x, --start|-s, --disable|-d, --license|-l, --help, -h                                                 #
@@ -138,7 +138,7 @@ SaveVms() {
 
 NoVmExit() {
   mapfile -u5 -t AllVms 5< <(ListVms)
-  (( ${#AllVms[*]} )) || die "No virtual machine found!"
+  (( ${#AllVms[*]} )) || die "No virtual machine found!" 0
 }
 
 # ============================================================================================================================================ #
@@ -151,7 +151,8 @@ while IFS= read -u6 -r vm; do
   uuids+=("${running_uuid%"}"*}")
 done 6< <(ListRunningVms)
 
-RunningUuids=$(IFS='|'; printf '%s' "@(${uuids[*]})")
+# RunningUuids=$(IFS='|'; printf '%s' "@(${uuids[*]})")
+RunningUuids=$(IFS='|'; printf '@(%s)' "${uuids[*]}")
 
 # ============================================================================================================================================ #
 #                        'Function to sanitize/extract the vmname and uuid using P.E. inside the start,stop function.'                         #
@@ -230,6 +231,7 @@ VBoxDaemons() {
 KillAllVBoxProcess() {
   local entry pid daemon daemon_name is_running IFS
   declare -A pids
+
   while IFS= read -ru9 daemon; do
     daemon_name=${daemon##*/}
     while IFS= read -ru8 pid; do
@@ -238,18 +240,18 @@ KillAllVBoxProcess() {
   done 9< <(VBoxDaemons)
 
   for entry in "${!pids[@]}"; do
-    printf 'Stopping %s (PID: %d)...' "$entry"  "${pids[$entry]}"
+    printf 'Stopping process %s (PID: %d) with SIGTERM... ' "$entry"  "${pids[$entry]}"
     ##: If the daemon was stopped already print the modified error message, and skip it!
     is_running=$(kill -15 "${pids[$entry]}" 2>&1) || {
-      printf '%s (PID: %s' "$entry" "${is_running##*\(}" &&
+      printf '%s (PID: %s ' "$entry" "${is_running##*\(}" &&
       continue
     }
     # sleep 1 ##: Using sleep will give an error `No such process`
-    ##: `kill -9` would be BRUTAL and NO MERCY!!!
-    # kill -0 "${pid[$entry]}" 2>/dev/null && {
-    #   printf 'Force killing %s (PID: %d)...\n' "$entry" "${pids[$entry]}"
-    #   kill -9 "${pids[$entry]}"
-    # }
+    #: `kill -9` would be BRUTAL and NO MERCY!!! but necessary for an update/reinstall of VirtualBox/rebuild of the kernel module.
+     kill -0 "${pid[$entry]}" 2>/dev/null && {
+       printf 'Force killing process %s (PID: %d) with SIGKILL...\n' "$entry" "${pids[$entry]}"
+       kill -9 "${pids[$entry]}"
+     }
     printf '%s stopped gracefully.\n' "$entry"
   done
 }
@@ -260,7 +262,7 @@ KillAllVBoxProcess() {
 
 stop() {
   local line
-  (( ${#uuids[*]} )) || die "No virtual machine runnning!"
+  (( ${#uuids[*]} )) || die "No virtual machine runnning!" 0
   while IFS= read -u8 -r line; do
     ExtractVmNameUuid
     printf '%s\n' "Saving machine '$VmName' state..."
@@ -362,7 +364,7 @@ return
 
 license() {
   lisensya=/usr/share/doc/packages/systemd-vboxinit/LICENSE
-  [[ -f $lisensya ]] || die "Can't find license file: $lisensya"
+  [[ -f $lisensya ]] || die "Can't find license file: $lisensya" 1
   less /usr/share/doc/packages/systemd-vboxinit/LICENSE || return 1
   return
 }

@@ -1,8 +1,10 @@
 # ============================================================================================ #
 #: Description     : Unit file for systemd-vboxinit.                                           #
-#: Url             : https://github.com/Jetchisel/VBoxAutostart                                #
+#: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                #
 #: Date Created    : Wed Oct 02 07:57:25 2013 +0800  /  Wed Oct 02 03:11:58 2013 UTC           #
-#: Last Edit       : Sat Mar 22 13:50:00 2025 +0800  /  Sat Mar 22 05:50:00 2025 UTC           #
+#: Last Edit       : Tue Apr 15 08:35:53 2025 +0800  /  Tue Apr 15 00:35:53 2025 UTC           #
+#: TODO            : Figure out why stopping the service has an exit status of 3.              #
+#:                 : PAGER='less +/exit\ status' man systemctl                                 #
 # ============================================================================================ #
 
 [Unit]
@@ -17,10 +19,10 @@ Documentation=man:systemd-vboxinit(1) file:///usr/share/doc/packages/systemd-vbo
 User=%I
 Restart=no
 Type=forking
-KillMode=none
+KillMode=mixed
 GuessMainPID=no
 Group=vboxusers
-TimeoutStopSec=40
+TimeoutStopSec=5min
 IgnoreSIGPIPE=false
 RemainAfterExit=yes
 StandardOutput=journal+console

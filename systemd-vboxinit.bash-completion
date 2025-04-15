@@ -3,14 +3,14 @@
 #: Title           : systemd-vboxinit.bash-completion                                                                 #
 #: Sypnosis        : systemd-vboxinit <TAB>                                                                           #
 #: Date Created    : Wed Oct 02 07:57:25 2013 +0800  /  Wed Oct 02 03:11:58 2013 UTC                                  #
-#: Last Edit       : Mon Apr 14 13:40:56 2025 +0800  /  Mon Apr 14 05:40:56 2025 UTC                                  #
+#: Last Edit       : Mon Apr 14 14:42:27 2025 +0800  /  Mon Apr 14 06:42:27 2025 UTC                                  #
 #: License         : GPLv3                                                                                            #
 #: Version         : 1.0.0                                                                                            #
 #: Author          : Jason V. Ferrer '<jason.ferrer@gmail.com>'                                                       #
 #: Description     : bash completion for systemd-vboxinit (Only long options for now).                                #
 #: Options         : --about, --stop, --start, --disable, --license, --help                                           #
 #: Home Page       : https://github.com/Jetchisel/VBoxAutostart                                                       #
-#: Copyright       : Jason V. Ferrer 2025                                                                             #
+#: Copyright       : Jason V. Ferrer 2013-2025                                                                        #
 #: TODO            : Add short options for the completion options via <TAB> key.                                      #
 # =================================================================================================================== #
 

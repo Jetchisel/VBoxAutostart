@@ -1,6 +1,6 @@
 .TH SYSTEMD-VBOXINIT 1 "April 2025" "systemd-vboxinit" "User Commands"
 .SH NAME
-systemd-vboxinit \- auto start/save of vbox VMs during boot, shutdown, and reboot of the host.
+systemd-vboxinit \- Enable automatic startup of virtual machine sessions during system boot and save their state upon host shutdown or halt.
 .SH SYNOPSIS
 .B systemd-vboxinit
 [\fIOPTIONS\fR]
@@ -8,7 +8,6 @@ systemd-vboxinit \- auto start/save of vbox VMs during boot, shutdown, and reboo
 Systemd-vboxinit is a script that manages VirtualBox VMs to auto start and auto save. It supports systemd integration to
 enable automatic boot and shutdown handling of VMs. Derived from vboxinit from the phpvirtualbox project, which is based
 on vboxtool. This version is tailored for OpenSUSE but works on any systemd-enabled distro.
-Enable automatic startup of virtual machine sessions during system boot and save their state upon host shutdown or halt.
 
 .SH OPTIONS
 .TP
