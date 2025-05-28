@@ -3,7 +3,7 @@
 #: Title           : systemd-vboxinit                                                                                                          #
 #: Sypnosis        : systemd-vboxinit OPTIONS                                                                                                  #
 #: Date Created    : Wed Oct 02 07:57:25 2013 +0800  /  Wed Oct 02 03:11:58 2013 UTC                                                           #
-#: Last Edit       : Tue Apr 15 08:50:59 2025 +0800  /  Tue Apr 15 00:50:59 2025 UTC                                                           #
+#: Last Edit       : Wed May 28 10:16:55 2025 +0800  /  Wed May 28 02:16:55 2025 UTC                                                           #
 #: License         : GPLv3                                                                                                                     #
 #: Version         : 2.2.1                                                                                                                     #
 #: Author          : Jason V. Ferrer '<jason.ferrer@gmail.com>'                                                                                #
@@ -364,7 +364,7 @@ return
 
 license() {
   lisensya=/usr/share/doc/packages/systemd-vboxinit/LICENSE
-  [[ -f $lisensya ]] || die "Can't find license file: $lisensya" 1
+  [[ -f ${lisensya} ]] || die "Can't find license file: $lisensya" 1
   less /usr/share/doc/packages/systemd-vboxinit/LICENSE || return 1
   return
 }
